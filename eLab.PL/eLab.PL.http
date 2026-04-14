@@ -1,0 +1,6 @@
+@eLab.PL_HostAddress = http://localhost:5086
+
+GET {{eLab.PL_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,16 @@
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\bin\Debug\net9.0\eLab.BLL.deps.json
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\bin\Debug\net9.0\eLab.BLL.dll
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\bin\Debug\net9.0\eLab.BLL.pdb
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\bin\Debug\net9.0\eLab.DAL.dll
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\bin\Debug\net9.0\eLab.DAL.pdb
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\obj\Debug\net9.0\eLab.BLL.csproj.AssemblyReference.cache
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\obj\Debug\net9.0\eLab.BLL.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\obj\Debug\net9.0\eLab.BLL.AssemblyInfoInputs.cache
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\obj\Debug\net9.0\eLab.BLL.AssemblyInfo.cs
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\obj\Debug\net9.0\eLab.BLL.csproj.CoreCompileInputs.cache
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\obj\Debug\net9.0\eLab.BLL.sourcelink.json
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\obj\Debug\net9.0\eLab.BLL.csproj.Up2Date
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\obj\Debug\net9.0\eLab.BLL.dll
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\obj\Debug\net9.0\refint\eLab.BLL.dll
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\obj\Debug\net9.0\eLab.BLL.pdb
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.BLL\obj\Debug\net9.0\ref\eLab.BLL.dll

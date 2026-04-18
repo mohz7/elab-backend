@@ -65,6 +65,9 @@ namespace eLab.BLL.Services.Classes
         public async Task<ServiceResult<BranchResponse>> GetByIdAsync(int id)
         {
             var branch = await _branchRepository.GetByIdAsync(id);
+            if (branch is null) 
+                return ServiceResult<BranchResponse>.Fail(404, "Branch not found", "...");
+
             return ServiceResult<BranchResponse>
             .Ok(branch.Adapt<BranchResponse>());
         }

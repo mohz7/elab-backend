@@ -25,13 +25,13 @@ namespace eLab.PL.Areas.Staff.Controllers
         public async Task<IActionResult> GetAll([FromQuery] int? testCatalogId)
         {
             var result = await _reportTemplateService.GetAllAsync(testCatalogId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var result = await _reportTemplateService.GetByIdAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         
     }

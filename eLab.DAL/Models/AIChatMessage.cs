@@ -7,11 +7,17 @@ using System.Threading.Tasks;
 
 namespace eLab.DAL.Models
 {
+    public enum ChatMessageRole
+    {
+        User,
+        Assistant
+    }
     public class AIChatMessage
     {
         public int Id { get; set; }
         public string Message { get; set; }
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
+        public ChatMessageRole Role { get; set; }
 
 
         // Navigation properties

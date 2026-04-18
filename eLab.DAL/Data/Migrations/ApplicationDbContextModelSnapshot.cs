@@ -249,6 +249,9 @@ namespace eLab.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
                     b.Property<string>("SenderId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -273,8 +276,11 @@ namespace eLab.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("BookingDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("BookingDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly>("BookingTime")
+                        .HasColumnType("time");
 
                     b.Property<int>("BranchId")
                         .HasColumnType("int");
@@ -623,9 +629,8 @@ namespace eLab.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
 
                     b.Property<string>("Notes")
                         .IsRequired()
@@ -718,8 +723,15 @@ namespace eLab.DAL.Migrations
                     b.Property<int?>("ReportTemplateId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ResultData")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("ResultDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("ResultFlags")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("ReviewedAt")
                         .HasColumnType("datetime2");

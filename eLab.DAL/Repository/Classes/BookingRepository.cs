@@ -53,5 +53,10 @@ namespace eLab.DAL.Repository.Classes
         {
             return await _context.Bookings.ToListAsync();
         }
+
+        public async Task<Booking> GetByIdAsync(int bookingId)
+        {
+            return await _context.Bookings.Include(bo => bo.PatientProfile).FirstOrDefaultAsync(bo => bo.Id == bookingId);
+        }
     }
 }

@@ -17,5 +17,7 @@ namespace eLab.BLL.Services.Interface
         public Task<ServiceResult<StaffProfilesResponse>> GetByIdAsync(string id);
         public Task<ServiceResult<string>> UpdateAsync(string id, StaffProfileRequest request);
         public Task<ServiceResult<string>> RemoveAsync(string id);
+        public Task<ServiceResult<string>> ChangePasswordAsync(string id, ChangePasswordRequest request);
+
     }
 }

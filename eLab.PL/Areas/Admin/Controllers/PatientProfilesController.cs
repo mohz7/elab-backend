@@ -25,13 +25,13 @@ namespace eLab.PL.Areas.Admin.Controllers
         public async Task<IActionResult> GetAll([FromQuery] int? branchId)
         {
             var result = await _patientProfileService.GetAllAsync(branchId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] string id)
         {
             var result = await _patientProfileService.GetByIdAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpPost("Create")]
@@ -39,19 +39,19 @@ namespace eLab.PL.Areas.Admin.Controllers
         {
             var staffId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _patientProfileService.CreateAsync(request, staffId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("Update/{id}")]
         public async Task<IActionResult> Update([FromRoute] string id, [FromBody] RegisterRequest request)
         {
             var result = await _patientProfileService.UpdateAsync(id, request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("ChangePassword/{id}")]
         public async Task<IActionResult> ChangePassword([FromRoute] string id, [FromBody] ChangePasswordRequest request)
         {
             var result = await _patientProfileService.ChangePasswordAsync(id, request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

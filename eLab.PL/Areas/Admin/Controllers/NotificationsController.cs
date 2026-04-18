@@ -24,21 +24,21 @@ namespace eLab.PL.Areas.Admin.Controllers
         public async Task<IActionResult> GetAll()
         {
             var result = await _notificationService.GetAllAsync();
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("GetByUserId/{userId}")]
         public async Task<IActionResult> GetById([FromRoute] string userId)
         {
             var result = await _notificationService.GetAllByUserAsync(userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("GetById{id}/{userId}")]
         public async Task<IActionResult> GetById([FromRoute] int id, [FromRoute] string userId)
         {
             var result = await _notificationService.GetByIdAsync(id, userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("Unread/{userId}")]
@@ -53,14 +53,14 @@ namespace eLab.PL.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _notificationService.CreateAsync(request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpDelete("Remove/{id}/{userId}")]
         public async Task<IActionResult> Remove([FromRoute] int id, [FromRoute] string userId)
         {
             var result = await _notificationService.RemoveAsync(id, userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

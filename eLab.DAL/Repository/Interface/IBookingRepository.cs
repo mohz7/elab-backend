@@ -11,6 +11,7 @@ namespace eLab.DAL.Repository.Interface
     public interface IBookingRepository
     {
         Task<List<Booking>> GetAllAsync();
+        Task<Booking> GetByIdAsync(int bookingId);
         Task<Booking?> GetUserByBookingAsync(int bookingId);
         Task<Booking> AddAsync(Booking booking);
         Task<List<Booking>> GetBookingByUserAsync(string patientId);

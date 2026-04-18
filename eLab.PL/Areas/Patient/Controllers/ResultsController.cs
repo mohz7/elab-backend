@@ -1,5 +1,6 @@
 ﻿using eLab.BLL.Services.Interface;
 using eLab.DAL.Dto.Requests;
+using eLab.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ namespace eLab.PL.Areas.Patient.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _resultService.GetByIdAsync(id, UserId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         // Patient gets their full result history
@@ -34,8 +35,8 @@ namespace eLab.PL.Areas.Patient.Controllers
         {
             // get patientProfileId from claims or look it up
             var patientProfileId = User.FindFirstValue("PatientProfileId")!;
-            var results = await _resultService.GetMyResultsAsync(patientProfileId);
-            return Ok(results);
+            var result = await _resultService.GetMyResultsAsync(patientProfileId);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

@@ -26,14 +26,14 @@ namespace eLab.PL.Areas.Patient.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _cartService.AddToCartAsync(request, userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpGet("")]
         public async Task<IActionResult> GetUserCart()
         {
             var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _cartService.CartSummaryResponesAsync(UserId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

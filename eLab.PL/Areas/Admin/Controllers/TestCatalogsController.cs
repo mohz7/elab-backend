@@ -25,38 +25,38 @@ namespace eLab.PL.Areas.Admin.Controllers
         public async Task<IActionResult> GetAll()
         {
             var result = await _testCatalogService.GetAllAsync();
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute]int id)
         {
             var result = await _testCatalogService.GetByIdAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] TestCatalogRequest request)
         {
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _testCatalogService.CreateAsync(request, adminId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("Update/{id}")]
         public async Task<IActionResult> Upadte([FromRoute] int id,[FromBody] TestCatalogRequest request)
         {
             var result = await _testCatalogService.UpdateAsync(id, request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpDelete("Deactivate/{id}")]
         public async Task<IActionResult> DeactivateTestCatalog([FromRoute] int id)
         {
             var result = await _testCatalogService.DeactivateTestCatalogAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("Activate/{id}")]
         public async Task<IActionResult> ActivateTestCatalog([FromRoute] int id)
         {
             var result = await _testCatalogService.ActivateTestCatalogAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

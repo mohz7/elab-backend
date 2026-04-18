@@ -25,13 +25,13 @@ namespace eLab.PL.Areas.Staff.Controllers
         public async Task<IActionResult> AddToCart([FromRoute] string userId,[FromBody] CartRequest request)
         {
             var result = await _cartService.AddToCartAsync(request, userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUserCart([FromRoute] string userId)
         {
             var result = await _cartService.CartSummaryResponesAsync(userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

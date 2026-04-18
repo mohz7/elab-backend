@@ -1,0 +1,13 @@
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\bin\Release\net9.0\eLab.DAL.deps.json
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\bin\Release\net9.0\eLab.DAL.dll
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\bin\Release\net9.0\eLab.DAL.pdb
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\obj\Release\net9.0\eLab.DAL.csproj.AssemblyReference.cache
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\obj\Release\net9.0\eLab.DAL.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\obj\Release\net9.0\eLab.DAL.AssemblyInfoInputs.cache
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\obj\Release\net9.0\eLab.DAL.AssemblyInfo.cs
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\obj\Release\net9.0\eLab.DAL.csproj.CoreCompileInputs.cache
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\obj\Release\net9.0\eLab.DAL.sourcelink.json
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\obj\Release\net9.0\eLab.DAL.dll
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\obj\Release\net9.0\refint\eLab.DAL.dll
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\obj\Release\net9.0\eLab.DAL.pdb
+C:\Users\Admin\OneDrive\Desktop\Study\مشروع التخرج\مشروع التخرج\project\eLab\eLab.DAL\obj\Release\net9.0\ref\eLab.DAL.dll

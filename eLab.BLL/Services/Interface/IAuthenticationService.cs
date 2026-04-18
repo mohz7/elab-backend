@@ -19,6 +19,5 @@ namespace eLab.BLL.Services.Interface
         Task<bool> ForgotPasswordAsync(ForgotPassword request);
         Task<bool> ResetPasswordAsync(ResetPasswordRequest request);
 
-
     }
 }

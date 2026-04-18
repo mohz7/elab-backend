@@ -1,5 +1,6 @@
 ﻿using eLab.BLL.Services.Interface;
 using eLab.DAL.Dto.Requests;
+using eLab.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,15 +24,15 @@ namespace eLab.PL.Areas.Patient.Controllers
         [HttpGet("GetALl")]
         public async Task<IActionResult> GetAll([FromQuery] int? branchId)
         {
-            var branchs = await _priceService.GetAllAsync(branchId);
-            return Ok(branchs);
+            var result = await _priceService.GetAllAsync(branchId);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var result = await _priceService.GetByIdAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         
     }

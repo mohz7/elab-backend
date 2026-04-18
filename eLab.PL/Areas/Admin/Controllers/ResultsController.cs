@@ -1,5 +1,6 @@
 ﻿using eLab.BLL.Services.Interface;
 using eLab.DAL.Dto.Requests;
+using eLab.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,30 +25,24 @@ namespace eLab.PL.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Upload([FromBody] UploadResultRequest request)
         {
-            var result = await _resultService
-                .UploadResultAsync(request, UserId);
-
-            return Ok(result);
+            var result = await _resultService.UploadResultAsync(request, UserId);
+            return StatusCode(result.StatusCode, result);
         }
 
         // Anyone sees a single result (access checked in service)
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _resultService
-                .GetByIdAsync(id, UserId);
-
-            return Ok(result);
+            var result = await _resultService.GetByIdAsync(id, UserId);
+            return StatusCode(result.StatusCode, result);
         }
 
         // Staff sees results waiting for their approval
         [HttpGet("pending")]
         public async Task<IActionResult> GetPending()
         {
-            var results = await _resultService
-                .GetPendingApprovalAsync(UserId);
-
-            return Ok(results);
+            var result = await _resultService.GetPendingApprovalAsync(UserId);
+            return StatusCode(result.StatusCode, result);
         }
 
         // Staff approves or rejects a result
@@ -55,10 +50,8 @@ namespace eLab.PL.Areas.Admin.Controllers
         public async Task<IActionResult> Review(
             int id, [FromBody] ReviewResultRequest request)
         {
-            var result = await _resultService
-                .ReviewResultAsync(id, request, UserId);
-
-            return Ok(result);
+            var result = await _resultService.ReviewResultAsync(id, request, UserId);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

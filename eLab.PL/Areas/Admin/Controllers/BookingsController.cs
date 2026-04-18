@@ -2,6 +2,7 @@
 using eLab.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eLab.PL.Areas.Admin.Controllers
@@ -22,8 +23,8 @@ namespace eLab.PL.Areas.Admin.Controllers
         [HttpGet("status/{status}")]
         public async Task<IActionResult> GetBookingByStatus(Status status)
         {
-            var bookings = await _bookingService.GetByStatusAsync(status);
-            return Ok(bookings);
+            var result = await _bookingService.GetByStatusAsync(status);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("change-status/{orderId}")]
         public async Task<IActionResult> ChangeOrderStatus(int orderId, [FromBody] Status newStatus)

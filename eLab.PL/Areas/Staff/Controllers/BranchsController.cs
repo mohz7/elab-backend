@@ -1,4 +1,5 @@
 ﻿using eLab.BLL.Services.Interface;
+using eLab.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,14 +21,14 @@ namespace eLab.PL.Areas.Staff.Controllers
         [HttpGet("GetALl")]
         public async Task<IActionResult> GetAll()
         {
-            var branchs = await _branchService.GetAllAsync();
-            return Ok(branchs);
+            var result = await _branchService.GetAllAsync();
+            return StatusCode(result.StatusCode, result);
         }
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var result = await _branchService.GetByIdAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

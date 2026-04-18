@@ -25,14 +25,14 @@ namespace eLab.PL.Areas.Staff.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _notificationService.GetAllByUserAsync(userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("GetByUserId/{userId}")]
         public async Task<IActionResult> GetById([FromRoute] string userId)
         {
             var result = await _notificationService.GetAllByUserAsync(userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("GetById/{id}")]
@@ -40,7 +40,7 @@ namespace eLab.PL.Areas.Staff.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _notificationService.GetByIdAsync(id, userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("unread")]
@@ -56,7 +56,7 @@ namespace eLab.PL.Areas.Staff.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _notificationService.CreateAsync(request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpPatch("{id}/read")]
@@ -64,7 +64,7 @@ namespace eLab.PL.Areas.Staff.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _notificationService.MarkAsReadAsync(id, userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpPatch("read-all")]
@@ -72,7 +72,7 @@ namespace eLab.PL.Areas.Staff.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _notificationService.MarkAllAsReadAsync(userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpDelete("Remove/{id}")]
@@ -80,7 +80,7 @@ namespace eLab.PL.Areas.Staff.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _notificationService.RemoveAsync(id, userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

@@ -836,6 +836,27 @@
   },
   {
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.StaffProfilesController",
+    "Method": "ChangePassword",
+    "RelativePath": "api/admin/StaffProfiles/ChangePassword/{id}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "eLab.DAL.Dto.Requests.ChangePasswordRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Admin.Controllers.StaffProfilesController",
     "Method": "Create",
     "RelativePath": "api/admin/StaffProfiles/Create",
     "HttpMethod": "POST",
@@ -1160,6 +1181,69 @@
     ]
   },
   {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.AIsController",
+    "Method": "StartSession",
+    "RelativePath": "api/patient/AIs/sessions",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "eLab.DAL.Dto.Requests.StartAISessionRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.AIsController",
+    "Method": "GetMySessions",
+    "RelativePath": "api/patient/AIs/sessions",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.AIsController",
+    "Method": "GetSession",
+    "RelativePath": "api/patient/AIs/sessions/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.AIsController",
+    "Method": "SendMessage",
+    "RelativePath": "api/patient/AIs/sessions/{id}/messages",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "eLab.DAL.Dto.Requests.AIMessageRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "eLab.PL.Areas.Patient.Controllers.BranchsController",
     "Method": "GetAllPatient",
     "RelativePath": "api/patient/Branchs/GetALl",
@@ -1209,6 +1293,85 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.ChatsController",
+    "Method": "CreateSession",
+    "RelativePath": "api/patient/Chats/sessions",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "eLab.DAL.Dto.Requests.StaffChatRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.ChatsController",
+    "Method": "GetMySessions",
+    "RelativePath": "api/patient/Chats/sessions",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.ChatsController",
+    "Method": "GetSession",
+    "RelativePath": "api/patient/Chats/sessions/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.ChatsController",
+    "Method": "SendMessage",
+    "RelativePath": "api/patient/Chats/sessions/{id}/messages",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "eLab.DAL.Dto.Requests.StaffChatMessageRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.ChatsController",
+    "Method": "MarkRead",
+    "RelativePath": "api/patient/Chats/sessions/{id}/read",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -1356,16 +1519,11 @@
   {
     "ContainingType": "eLab.PL.Areas.patient.Controllers.PatientProfilesController",
     "Method": "ChangePassword",
-    "RelativePath": "api/patient/PatientProfiles/ChangePassword/{id}",
+    "RelativePath": "api/patient/PatientProfiles/ChangePassword",
     "HttpMethod": "PATCH",
     "IsController": true,
     "Order": 0,
     "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.String",
-        "IsRequired": true
-      },
       {
         "Name": "request",
         "Type": "eLab.DAL.Dto.Requests.ChangePasswordRequest",
@@ -1464,6 +1622,48 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.StaffProfilesController",
+    "Method": "GetAll",
+    "RelativePath": "api/patient/StaffProfiles/GetAll",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "branchId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "job",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "IsActive",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.StaffProfilesController",
+    "Method": "GetById",
+    "RelativePath": "api/patient/StaffProfiles/GetById/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "eLab.PL.Areas.Patient.Controllers.TestCatalogsController",
     "Method": "GetAll",
     "RelativePath": "api/patient/TestCatalogs/GetAll",
@@ -1552,6 +1752,69 @@
       {
         "Name": "userId",
         "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.ChatsController",
+    "Method": "GetMySessions",
+    "RelativePath": "api/staff/Chats/sessions",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.ChatsController",
+    "Method": "GetSession",
+    "RelativePath": "api/staff/Chats/sessions/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.ChatsController",
+    "Method": "SendMessage",
+    "RelativePath": "api/staff/Chats/sessions/{id}/messages",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "eLab.DAL.Dto.Requests.StaffChatMessageRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.ChatsController",
+    "Method": "MarkRead",
+    "RelativePath": "api/staff/Chats/sessions/{id}/read",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],
@@ -1940,6 +2203,69 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.StaffProfilesController",
+    "Method": "ChangePassword",
+    "RelativePath": "api/staff/StaffProfiles/ChangePassword/{id}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "eLab.DAL.Dto.Requests.ChangePasswordRequest",
+        "IsRequired": true
+      },
+      {
+        "Name": "id",
+        "Type": "",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.StaffProfilesController",
+    "Method": "GetAll",
+    "RelativePath": "api/staff/StaffProfiles/GetAll",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "branchId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "job",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "IsActive",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.StaffProfilesController",
+    "Method": "GetById",
+    "RelativePath": "api/staff/StaffProfiles/GetById/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {

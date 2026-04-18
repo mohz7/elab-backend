@@ -24,7 +24,7 @@ namespace eLab.PL.Areas.Patient.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _checkOutService.ProcessPaymentAsync(request, userId, Request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("success/{bookingId}")]
@@ -32,7 +32,7 @@ namespace eLab.PL.Areas.Patient.Controllers
         public async Task<IActionResult> Success([FromRoute] int bookingId)
         {
             var result = await _checkOutService.HandlePaymentSuccessAsync(bookingId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

@@ -25,32 +25,32 @@ namespace eLab.PL.Areas.Admin.Controllers
         public async Task<IActionResult> GetAll([FromQuery] int? testCatalogId)
         {
             var result = await _reportTemplateService.GetAllAsync(testCatalogId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var result = await _reportTemplateService.GetByIdAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] ReportTemplateRequest request)
         {
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _reportTemplateService.CreateAsync(request, adminId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpDelete("Remove/{id}")]
         public async Task<IActionResult> Remove([FromRoute] int id)
         {
             var result = await _reportTemplateService.RemoveAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("Update/{id}")]
         public async Task<IActionResult> Update([FromHeader] int id, [FromBody] ReportTemplateRequest request)
         {
             var result = await _reportTemplateService.UpdateAsync(id, request);
-            return Ok(request);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

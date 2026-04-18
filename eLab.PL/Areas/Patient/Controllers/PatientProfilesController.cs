@@ -26,19 +26,20 @@ namespace eLab.PL.Areas.patient.Controllers
         {
             var patientId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _patientProfileService.GetByPatientAsync(patientId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("Update/{id}")]
         public async Task<IActionResult> Update([FromRoute] string id, [FromBody] RegisterRequest request)
         {
             var result = await _patientProfileService.UpdateAsync(id, request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpPatch("ChangePassword/{id}")]
-        public async Task<IActionResult> ChangePassword([FromRoute] string id, [FromBody] ChangePasswordRequest request)
+        [HttpPatch("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            var result = await _patientProfileService.ChangePasswordAsync(id, request);
-            return Ok(result);
+            var patientId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _patientProfileService.ChangePasswordAsync(patientId, request);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

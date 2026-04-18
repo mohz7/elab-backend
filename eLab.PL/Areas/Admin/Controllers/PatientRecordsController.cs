@@ -23,7 +23,7 @@ namespace eLab.PL.Areas.Admin.Controllers
         public async Task<IActionResult> GetAll()
         {
             var result = await _patientRecordService.GetAllAsync();
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("GetById/{id}")]
@@ -31,35 +31,35 @@ namespace eLab.PL.Areas.Admin.Controllers
         {
             var result = await _patientRecordService.GetByIdAsync(id);
             if (result == null) return NotFound();
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("patient/{patientProfileId}")]
         public async Task<IActionResult> GetByPatientProfile(string patientProfileId)
         {
             var result = await _patientRecordService.GetByPatientProfileIdAsync(patientProfileId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpPost("Create")]
         public async Task<IActionResult> Create(PatientRecordRequest request)
         {
             var result = await _patientRecordService.CreateAsync(request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpDelete("Remove/{id}")]
         public async Task<IActionResult> Remove(int id)
         {
             var result = await _patientRecordService.RemoveAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpPatch("Update/{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] PatientRecordRequest request)
         {
             var result = await _patientRecordService.UpdateAsync(id, request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

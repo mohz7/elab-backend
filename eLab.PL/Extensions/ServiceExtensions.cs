@@ -68,6 +68,13 @@ namespace eLab.PL.Extensions
             services.AddScoped<IResultRepository, ResultRepository>();
             services.AddScoped<IResultService, ResultService>();
 
+            // StaffChat
+            services.AddScoped<IStaffChatRepository, StaffChatRepository>();
+            services.AddScoped<IStaffChatService, StaffChatService>();
+
+            // AIChat
+            services.AddScoped<IAIChatRepository, AIChatRepository>();
+            services.AddScoped<IAIChatService, AIChatService>();
 
             return services;
         }

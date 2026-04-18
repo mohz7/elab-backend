@@ -1,5 +1,6 @@
 ﻿using eLab.BLL.Services.Interface;
 using eLab.DAL.Dto.Requests;
+using eLab.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,34 +23,34 @@ namespace eLab.PL.Areas.Admin.Controllers
         [HttpGet("GetALl")]
         public async Task<IActionResult> GetAll()
         {
-            var branchs = await _branchService.GetAllAsync();
-            return Ok(branchs);
+            var result = await _branchService.GetAllAsync();
+            return StatusCode(result.StatusCode, result);
         }
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var result = await _branchService.GetByIdAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody]BranchRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _branchService.CreateAsync(request,userId);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("Update/{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] BranchRequest request)
         {
             var result = await _branchService.UpdateAsync(id, request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpDelete("Remove/{id}")]
         public async Task<IActionResult> Remove([FromHeader] int id)
         {
             var result = await _branchService.RemoveAsync(id);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

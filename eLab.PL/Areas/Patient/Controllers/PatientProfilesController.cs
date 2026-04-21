@@ -21,8 +21,8 @@ namespace eLab.PL.Areas.patient.Controllers
             _patientProfileService = patientProfileService;
         }
 
-        [HttpGet("Get")]
-        public async Task<IActionResult> Get()
+        [HttpGet("GetMyProfile")]
+        public async Task<IActionResult> GetMyProfile()
         {
             var patientId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _patientProfileService.GetByPatientAsync(patientId);

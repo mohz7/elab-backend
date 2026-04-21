@@ -9,6 +9,5 @@ namespace eLab.DAL.Dto.Requests
     public class StaffChatRequest
     {
         public int BookingId { get; set; }
-        public string PatientProfileId { get; set; }
     }
 }

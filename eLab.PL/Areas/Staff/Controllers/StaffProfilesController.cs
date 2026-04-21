@@ -34,6 +34,13 @@ namespace eLab.PL.Areas.Staff.Controllers
             var result = await _staffProfilesService.GetByIdAsync(id);
             return StatusCode(result.StatusCode, result);
         }
+        [HttpGet("GetMyProfile")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _staffProfilesService.GetByIdAsync(userId);
+            return StatusCode(result.StatusCode, result);
+        }
         [HttpPatch("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {

@@ -8,11 +8,24 @@ namespace eLab.DAL.Dto.Responses
 {
     public class StaffChatSessionResponse
     {
-        public int Id { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public int ChatId { get; set; }
         public int BookingId { get; set; }
-        public string PatientProfileId { get; set; }
-        public string StaffProfileId { get; set; }
-        public List<StaffChatMessageResponse> StaffChatMessages { get; set; } = new();
+
+        // patient info
+        public string PatientId { get; set; }
+        public string PatientName { get; set; }
+
+        // staff info
+        public string StaffId { get; set; }
+        public string StaffName { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+
+        // all messages ordered by SentAt
+        public List<StaffChatMessageResponse> Messages { get; set; } = new List<StaffChatMessageResponse>();
+
+        // convenience counts for frontend badge/notification
+        public int TotalMessages { get; set; }
+        public int UnreadCount { get; set; }
     }
 }

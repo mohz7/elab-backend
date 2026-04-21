@@ -1362,7 +1362,7 @@
     "ContainingType": "eLab.PL.Areas.Patient.Controllers.ChatsController",
     "Method": "MarkRead",
     "RelativePath": "api/patient/Chats/sessions/{id}/read",
-    "HttpMethod": "PATCH",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -1534,8 +1534,8 @@
   },
   {
     "ContainingType": "eLab.PL.Areas.patient.Controllers.PatientProfilesController",
-    "Method": "Get",
-    "RelativePath": "api/patient/PatientProfiles/Get",
+    "Method": "GetMyProfile",
+    "RelativePath": "api/patient/PatientProfiles/GetMyProfile",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -1808,7 +1808,7 @@
     "ContainingType": "eLab.PL.Areas.Staff.Controllers.ChatsController",
     "Method": "MarkRead",
     "RelativePath": "api/staff/Chats/sessions/{id}/read",
-    "HttpMethod": "PATCH",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -2208,7 +2208,7 @@
   {
     "ContainingType": "eLab.PL.Areas.Staff.Controllers.StaffProfilesController",
     "Method": "ChangePassword",
-    "RelativePath": "api/staff/StaffProfiles/ChangePassword/{id}",
+    "RelativePath": "api/staff/StaffProfiles/ChangePassword",
     "HttpMethod": "PATCH",
     "IsController": true,
     "Order": 0,
@@ -2216,11 +2216,6 @@
       {
         "Name": "request",
         "Type": "eLab.DAL.Dto.Requests.ChangePasswordRequest",
-        "IsRequired": true
-      },
-      {
-        "Name": "id",
-        "Type": "",
         "IsRequired": true
       }
     ],
@@ -2266,6 +2261,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.StaffProfilesController",
+    "Method": "GetMyProfile",
+    "RelativePath": "api/staff/StaffProfiles/GetMyProfile",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {

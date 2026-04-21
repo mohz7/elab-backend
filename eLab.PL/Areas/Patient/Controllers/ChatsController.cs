@@ -16,7 +16,7 @@ namespace eLab.PL.Areas.Patient.Controllers
     public class ChatsController : ControllerBase
     {
         private readonly IStaffChatService _chatService;
-        private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
+        private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
 
         public ChatsController(IStaffChatService chatService)
         {
@@ -51,7 +51,7 @@ namespace eLab.PL.Areas.Patient.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpPatch("sessions/{id}/read")]
+        [HttpPost("sessions/{id}/read")]
         public async Task<IActionResult> MarkRead(int id)
         {
             var result = await _chatService.MarkAsReadAsync(id, UserId);

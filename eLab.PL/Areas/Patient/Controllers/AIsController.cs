@@ -16,8 +16,7 @@ namespace eLab.PL.Areas.Patient.Controllers
     public class AIsController : ControllerBase
     {
         private readonly IAIChatService _aiChatService;
-        private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
-
+        private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
         public AIsController(IAIChatService aiChatService) => _aiChatService = aiChatService;
 
         [HttpPost("sessions")]

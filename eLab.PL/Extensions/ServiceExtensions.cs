@@ -75,6 +75,11 @@ namespace eLab.PL.Extensions
             // AIChat
             services.AddScoped<IAIChatRepository, AIChatRepository>();
             services.AddScoped<IAIChatService, AIChatService>();
+            services.AddHttpClient<IAIService, GeminiAIService>(client =>
+            {
+                client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
 
             return services;
         }

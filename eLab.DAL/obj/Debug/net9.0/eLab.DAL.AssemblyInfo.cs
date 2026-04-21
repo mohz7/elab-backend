@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("eLab.DAL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8a16bd00bdab5f2a451b37e0fe2ea2afaf75eec6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+47515fe239369c06e9ddc825576c22c68bd3179b")]
 [assembly: System.Reflection.AssemblyProductAttribute("eLab.DAL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("eLab.DAL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

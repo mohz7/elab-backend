@@ -13,16 +13,16 @@ namespace eLab.BLL.Services.Classes
     {
         private readonly IAIChatRepository _aiChatRepository;
         private readonly IResultRepository _resultRepository;
-        //private readonly IAIService _aiService;
+        private readonly IAIService _aiService;
 
         public AIChatService(
             IAIChatRepository aiChatRepository,
-            IResultRepository resultRepository)
-            //IAIService aiService)
+            IResultRepository resultRepository,
+            IAIService aiService)
         {
             _aiChatRepository = aiChatRepository;
             _resultRepository = resultRepository;
-            //_aiService = aiService;
+            _aiService = aiService;
         }
 
         public async Task<ServiceResult<AIChatSessionResponse>> StartSessionAsync(int resultId, string patientId)
@@ -48,7 +48,7 @@ namespace eLab.BLL.Services.Classes
             if (created != 1)
                 return ServiceResult<AIChatSessionResponse>.Fail(400, "Failed to create AI chat session.", "...");
 
-            return ServiceResult<AIChatSessionResponse>.Ok(session.Adapt<AIChatSessionResponse>());
+            return ServiceResult<AIChatSessionResponse>.Ok(MapSession(session));
         }
 
         public async Task<ServiceResult<AIChatSessionResponse>> GetSessionAsync(int aiChatId, string patientId)
@@ -60,13 +60,15 @@ namespace eLab.BLL.Services.Classes
             if (session.PatientProfileId != patientId)
                 return ServiceResult<AIChatSessionResponse>.Fail(403, "Access denied.", "...");
 
-            return ServiceResult<AIChatSessionResponse>.Ok(session.Adapt<AIChatSessionResponse>());
+            return ServiceResult<AIChatSessionResponse>.Ok(MapSession(session));
         }
 
         public async Task<ServiceResult<List<AIChatSessionResponse>>> GetMySessionsAsync(string patientId)
         {
             var sessions = await _aiChatRepository.GetByPatientIdAsync(patientId);
-            return ServiceResult<List<AIChatSessionResponse>>.Ok(sessions.Adapt<List<AIChatSessionResponse>>());
+            return ServiceResult<List<AIChatSessionResponse>>.Ok(
+                sessions.Select(MapSession).ToList()
+            );
         }
 
         public async Task<ServiceResult<AIConversationResponse>> SendMessageAsync(int aiChatId, string patientId, string userMessage)
@@ -85,7 +87,7 @@ namespace eLab.BLL.Services.Classes
                 SenderId = patientId,
                 Role = ChatMessageRole.User,
                 Message = userMessage,
-                SentAt = DateTime.UtcNow
+                SentAt = DateTime.UtcNow,
             };
 
             var userMsgResult = await _aiChatRepository.AddMessageAsync(userMsg);
@@ -96,11 +98,11 @@ namespace eLab.BLL.Services.Classes
             var history = await _aiChatRepository.GetMessagesAsync(aiChatId);
 
             // 3. call AI with result context + full history
-            //var aiReply = await _aiService.GetConversationResponseAsync(
-            //    session.ContextSummary,
-            //    history,
-            //    userMessage
-            //);
+            var aiReply = await _aiService.GetConversationResponseAsync(
+                session.ContextSummary,
+                history,
+                userMessage
+            );
 
             // 4. save AI response
             var aiMsg = new AIChatMessage
@@ -108,7 +110,7 @@ namespace eLab.BLL.Services.Classes
                 AIChatId = aiChatId,
                 SenderId = null,
                 Role = ChatMessageRole.Assistant,
-                //Message = aiReply,
+                Message = aiReply,
                 SentAt = DateTime.UtcNow
             };
 
@@ -136,6 +138,46 @@ namespace eLab.BLL.Services.Classes
             sb.AppendLine("Patient Lab Results:");
             sb.AppendLine(System.Text.Json.JsonSerializer.Serialize(result.ResultData));
             return sb.ToString();
+        }
+
+        private AIChatSessionResponse MapSession(AIChat session)
+        {
+            var messages = session.AIChatMessages?
+                .OrderBy(m => m.SentAt)
+                .ToList() ?? new List<AIChatMessage>();
+
+            return new AIChatSessionResponse
+            {
+                AIChatId = session.Id,
+                ResultId = session.ResultId ?? 0,
+
+                TestName = session.Result?.BookingItem?.TestCatalog?.Name ?? "",
+                PatientName = session.PatientProfile?.User.FullName ?? "",
+
+                StartedAt = session.StartedAt,
+
+                Messages = messages.Select(m => new AIChatMessageResponse
+                {
+                    Id = m.Id,
+                    AIChatId = m.AIChatId,
+                    Role = m.Role.ToString(),
+                    Message = m.Message,
+                    SentAt = m.SentAt
+                }).ToList(),
+
+                TotalMessages = messages.Count
+            };
+        }
+        private AIChatMessageResponse MapMessage(AIChatMessage msg)
+        {
+            return new AIChatMessageResponse
+            {
+                Id = msg.Id,
+                AIChatId = msg.AIChatId,
+                Role = msg.Role.ToString(),
+                Message = msg.Message,
+                SentAt = msg.SentAt
+            };
         }
     }
 }

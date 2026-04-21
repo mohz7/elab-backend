@@ -31,7 +31,6 @@ namespace eLab.BLL.Services.Classes
             if (booking is null)
                 return ServiceResult<StaffChatSessionResponse>.Fail(404, "Booking not found.", "...");
 
-            // ✅ Authorization: تأكد أن المريض هو صاحب الحجز
             if (booking.PatientProfileId != patientId)
                 return ServiceResult<StaffChatSessionResponse>.Fail(403, "You are not allowed to create this session.", "...");
 
@@ -47,10 +46,9 @@ namespace eLab.BLL.Services.Classes
             if (success < 0)
                 return ServiceResult<StaffChatSessionResponse>.Fail(400, "Failed to create chat session.", "...");
 
-            return ServiceResult<StaffChatSessionResponse>.Ok(chat.Adapt<StaffChatSessionResponse>());
+            return ServiceResult<StaffChatSessionResponse>.Ok(MapSession(chat));
         }
 
-        // 🔹 Get Chat Session
         public async Task<ServiceResult<StaffChatSessionResponse>> GetSessionAsync(int chatId, string requestingUserId)
         {
             var chat = await _staffChatRepository.GetByIdAsync(chatId);
@@ -60,26 +58,25 @@ namespace eLab.BLL.Services.Classes
             if (!IsParticipant(chat, requestingUserId))
                 return ServiceResult<StaffChatSessionResponse>.Fail(403, "Access denied.", "...");
 
-            return ServiceResult<StaffChatSessionResponse>.Ok(chat.Adapt<StaffChatSessionResponse>());
+            return ServiceResult<StaffChatSessionResponse>.Ok(MapSession(chat));
         }
 
-        // 🔹 Get Patient Sessions
         public async Task<ServiceResult<List<StaffChatSessionResponse>>> GetByPatientIdAsync(string patientId)
         {
             var sessions = await _staffChatRepository.GetByPatientIdAsync(patientId);
             return ServiceResult<List<StaffChatSessionResponse>>.Ok(
-                sessions.Adapt<List<StaffChatSessionResponse>>());
+                sessions.Select(MapSession).ToList()
+            );
         }
 
-        // 🔹 Get Staff Sessions
         public async Task<ServiceResult<List<StaffChatSessionResponse>>> GetByStaffIdAsync(string staffId)
         {
             var sessions = await _staffChatRepository.GetByStaffIdAsync(staffId);
             return ServiceResult<List<StaffChatSessionResponse>>.Ok(
-                sessions.Adapt<List<StaffChatSessionResponse>>());
+                sessions.Select(MapSession).ToList()
+            );
         }
 
-        // 🔹 Send Message
         public async Task<ServiceResult<StaffChatMessageResponse>> SendMessageAsync(int chatId, string senderId, string message)
         {
             var chat = await _staffChatRepository.GetByIdAsync(chatId);
@@ -89,7 +86,6 @@ namespace eLab.BLL.Services.Classes
             if (!IsParticipant(chat, senderId))
                 return ServiceResult<StaffChatMessageResponse>.Fail(403, "You are not a participant in this chat.", "...");
 
-            // ✅ Validation
             if (string.IsNullOrWhiteSpace(message))
                 return ServiceResult<StaffChatMessageResponse>.Fail(400, "Message cannot be empty.", "...");
 
@@ -109,17 +105,17 @@ namespace eLab.BLL.Services.Classes
             if (success < 0)
                 return ServiceResult<StaffChatMessageResponse>.Fail(400, "Failed to send message.", "...");
 
-            return ServiceResult<StaffChatMessageResponse>.Ok(msg.Adapt<StaffChatMessageResponse>());
+            return ServiceResult<StaffChatMessageResponse>.Ok(
+                MapMessage(msg, chat)
+            );
         }
 
-        // 🔹 Mark Messages As Read
         public async Task<ServiceResult<string>> MarkAsReadAsync(int chatId, string readerId)
         {
             var chat = await _staffChatRepository.GetByIdAsync(chatId);
             if (chat is null)
                 return ServiceResult<string>.Fail(404, "Chat session not found.", "...");
 
-            // ✅ Authorization
             if (!IsParticipant(chat, readerId))
                 return ServiceResult<string>.Fail(403, "Access denied.", "...");
 
@@ -128,11 +124,68 @@ namespace eLab.BLL.Services.Classes
             return ServiceResult<string>.Ok("Messages marked as read successfully.");
         }
 
-        // 🔒 Helper Method
         private bool IsParticipant(StaffChat chat, string userId)
         {
             return chat.PatientProfile?.UserId == userId
                 || chat.StaffProfile?.UserId == userId;
+        }
+        private StaffChatSessionResponse MapSession(StaffChat chat)
+        {
+            var messages = chat.StaffChatMessages?
+                .OrderBy(m => m.SentAt)
+                .ToList() ?? new List<StaffChatMessage>();
+
+            return new StaffChatSessionResponse
+            {
+                ChatId = chat.Id,
+                BookingId = chat.BookingId,
+
+                PatientId = chat.PatientProfileId,
+                PatientName = chat.PatientProfile?.User.FullName ?? "",
+
+                StaffId = chat.StaffProfileId,
+                StaffName = chat.StaffProfile?.User.FullName ?? "",
+
+                CreatedAt = chat.CreatedAt,
+
+                Messages = messages.Select(m => new StaffChatMessageResponse
+                {
+                    Id = m.Id,
+                    ChatId = m.ChatId ?? 0,
+                    SenderId = m.SenderId,
+                    Message = m.Message,
+                    IsRead = m.IsRead,
+                    SentAt = m.SentAt
+                }).ToList(),
+
+                TotalMessages = messages.Count,
+
+                UnreadCount = messages.Count(m => m.IsRead == false)
+            };
+        }
+        private StaffChatMessageResponse MapMessage(StaffChatMessage msg, StaffChat chat)
+        {
+            string senderRole =
+                chat.PatientProfileId == msg.SenderId ? "Patient" :
+                chat.StaffProfileId == msg.SenderId ? "Staff" :
+                "Unknown";
+
+            string senderName =
+                msg.Sender?.FullName ?? "Unknown";
+
+            return new StaffChatMessageResponse
+            {
+                Id = msg.Id,
+                ChatId = msg.ChatId ?? 0,
+
+                SenderId = msg.SenderId ?? "",
+                SenderName = senderName,
+                SenderRole = senderRole,
+
+                Message = msg.Message,
+                IsRead = msg.IsRead,
+                SentAt = msg.SentAt
+            };
         }
     }
 }

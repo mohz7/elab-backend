@@ -33,31 +33,26 @@ namespace eLab.BLL.Services.Classes
 
         public async Task<ServiceResult<string>> ChangePasswordAsync(string id, ChangePasswordRequest request)
         {
+            StaffProfile? staff = null;
             if (id.Length != 9)
             {
                 var user = await _userManager.FindByIdAsync(id);
-                if (user is null)
-                    return ServiceResult<string>.Fail(404, "Patient not found", "...");
+                staff = await _staffProfileRepository.GetByIdAsync(user.IdentityNumber);
 
-                var passwordCheck = await _userManager.CheckPasswordAsync(user, request.OldPassword);
-                if (!passwordCheck)
-                    return ServiceResult<string>.Fail(403, "Old password is incorrect", "...");
-
-                var result = await _userManager.ChangePasswordAsync(user, request.OldPassword, request.NewPassword);
             }
             else
             {
-                var staff = await _staffProfileRepository.GetByIdAsync(id);
-                if (staff is null)
-                    return ServiceResult<string>.Fail(404, "Staff not found", "...");
-
-                var passwordCheck = await _userManager.CheckPasswordAsync(staff.User, request.OldPassword);
-                if (!passwordCheck)
-                    return ServiceResult<string>.Fail(403, "Old password is incorrect", "...");
-
-                var result = await _userManager.ChangePasswordAsync(staff.User, request.OldPassword, request.NewPassword);
+                staff = await _staffProfileRepository.GetByIdAsync(id);
             }
+            if (staff is null)
+                return ServiceResult<string>.Fail(404, "Staff not found", "...");
 
+            var passwordCheck = await _userManager.CheckPasswordAsync(staff.User, request.OldPassword);
+            if (!passwordCheck)
+                return ServiceResult<string>.Fail(403, "Old password is incorrect", "...");
+
+            var result = await _userManager.ChangePasswordAsync(staff.User, request.OldPassword, request.NewPassword);
+            
             return ServiceResult<string>.Ok("Change passowrd successfully");
         }
 
@@ -133,7 +128,16 @@ namespace eLab.BLL.Services.Classes
 
         public async Task<ServiceResult<StaffProfilesResponse>> GetByIdAsync(string id)
         {
-            var staff = await _staffProfileRepository.GetByIdAsync(id);
+            StaffProfile? staff = null;
+            if (id.Length != 9)
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                staff = await _staffProfileRepository.GetByIdAsync(user.IdentityNumber);
+            }
+            else
+            {
+                staff = await _staffProfileRepository.GetByIdAsync(id);
+            }
             if (staff is null)
                 return ServiceResult<StaffProfilesResponse>.Fail(404, "Staff not found", "...");
             var result = new StaffProfilesResponse

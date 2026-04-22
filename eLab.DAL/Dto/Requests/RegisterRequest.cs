@@ -10,16 +10,30 @@ namespace eLab.DAL.DTO.Requests
 {
     public class RegisterRequest
     {
+        [Required]
         public string UserName { get; set; }
+
+        [Required]
         public string FullName { get; set; }
+
+        [Required]
         public string PhoneNumber { get; set; }
+
+        [Required]
         public string IdentityNumber { get; set; }
+
+        [Required]
         public Gender Gender { get; set; }
 
+        [Required]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateOnly DateOfBirth { get; set; }
+
+        [Required]
         public string Email { get; set; }
+
+        [Required]
         public string Password { get; set; }
         public string? BloodType { get; set; }
         public string? Allergies { get; set; }

@@ -18,7 +18,7 @@ namespace eLab.PL.Areas.Identity.Controllers
             _authenticationService = authenticationService;
         }
         [HttpPost("Register")]
-        public async Task<ActionResult<UserResponse>> Register(RegisterRequest request)
+        public async Task<ActionResult> Register(RegisterRequest request)
         {
             var result = await _authenticationService.RegisterAsync(request, Request);
             return Ok(result);

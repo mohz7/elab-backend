@@ -41,8 +41,8 @@ namespace eLab.DAL.Models
 
         // Navigation properties
 
-        // PatientProfile
-        public string PatientProfileId { get; set; }
+            // PatientProfile
+            public string PatientProfileId { get; set; }
             public PatientProfile? PatientProfile { get; set; }
 
             // Branch

@@ -41,7 +41,7 @@ namespace eLab.PL.Areas.Admin.Controllers
             var result = await _offerService.CreateAsync(request, userId);
             return StatusCode(result.StatusCode, result);
         }
-        [HttpPut("Update/{id}")]
+        [HttpPatch("Update/{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] OfferRequest request)
         {
             var result = await _offerService.UpdateAsync(id, request);

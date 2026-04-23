@@ -118,7 +118,6 @@ namespace eLab.BLL.Services.Classes
                 result.ApprovedById = staffUserId;
                 result.ReviewedAt = DateTime.UtcNow;
 
-                // 🔥 حذفنا VisibleToPatient
 
                 await _notificationRepository.CreateAsync(new Notification
                 {

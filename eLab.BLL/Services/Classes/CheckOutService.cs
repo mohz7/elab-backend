@@ -1,4 +1,5 @@
 ﻿using eLab.BLL.Services.Common;
+using eLab.BLL.Services.Interface;
 using eLab.DAL.Dto.Requests;
 using eLab.DAL.Dto.Responses;
 using eLab.DAL.Migrations;
@@ -19,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace eLab.BLL.Services.Classes
 {
-    public class CheckOutService
+    public class CheckOutService : ICheckOutService
     {
         private readonly ICartRepository _cartRepository;
         private readonly UserManager<User> _userManager;
@@ -31,6 +32,7 @@ namespace eLab.BLL.Services.Classes
         private readonly IBookingRepository _bookingRepository;
         private readonly IEmailSender _emailSender;
         private readonly IBookingItemRepository _bookingItemRepository;
+        private readonly IStaffProfileRepository _staffProfileRepository;
 
         public CheckOutService(ICartRepository cartRepository,
             UserManager<User> userManager,
@@ -41,7 +43,8 @@ namespace eLab.BLL.Services.Classes
             IOfferRepository offerRepository,
             IBookingRepository bookingRepository,
             IEmailSender emailSender,
-            IBookingItemRepository bookingItemRepository
+            IBookingItemRepository bookingItemRepository,
+            IStaffProfileRepository staffProfileRepository
             )
         {
             _cartRepository = cartRepository;
@@ -54,9 +57,10 @@ namespace eLab.BLL.Services.Classes
             _bookingRepository = bookingRepository;
             _emailSender = emailSender;
             _bookingItemRepository = bookingItemRepository;
+            _staffProfileRepository = staffProfileRepository;
         }
 
-        public async Task<bool> HandlePaymentSuccessAsync(int bookingId)
+        public async Task<ServiceResult<bool>> HandlePaymentSuccessAsync(int bookingId)
         {
             var booking = await _bookingRepository.GetUserByBookingAsync(bookingId);
             var userId = booking.PatientProfile.User.Id;
@@ -132,7 +136,7 @@ namespace eLab.BLL.Services.Classes
             }
 
             await _emailSender.SendEmailAsync(booking.PatientProfile.User.Email, subject, body);
-            return true;
+            return ServiceResult<bool>.Ok(true);
         }
 
         public async Task<ServiceResult<CheckOutResponse>> ProcessPaymentAsync(CheckOutRequest request, string userId, HttpRequest Request)
@@ -319,6 +323,166 @@ namespace eLab.BLL.Services.Classes
                 Message = "cash"
             };
             return ServiceResult<CheckOutResponse>.Ok(result);
+        }
+
+        public async Task<ServiceResult<CheckOutResponse>> ProcessPaymentByStaffAsync(string patientId, CheckOutRequest request, string userId, HttpRequest Request)
+        {
+            var result = new CheckOutResponse();
+            const int SLOT_DURATION = 20;
+
+            // Check Staff
+            var staff = await _userManager.FindByIdAsync(userId);
+            if (staff is null || !staff.IsActive)
+                return ServiceResult<CheckOutResponse>.Fail(404, "Staff not found or inactive", "...");
+
+            // Check Patient
+            var patient = await _patientProfileRepository.GetByIdAsync(patientId);
+            if (patient is null)
+                return ServiceResult<CheckOutResponse>.Fail(404, "Patient profile not found", "...");
+
+            var patientUser = await _userManager.FindByIdAsync(patient.UserId);
+            if (patientUser is null || !patientUser.IsActive)
+                return ServiceResult<CheckOutResponse>.Fail(404, "Patient not found or inactive", "...");
+
+            // Check Branch
+            var branch = await _branchRepository.GetByIdAsync(request.BranchId);
+            if (branch is null || !branch.IsActive)
+                return ServiceResult<CheckOutResponse>.Fail(404, "Branch not found or inactive", "...");
+
+            // Staff can only create cash bookings
+            if (request.PaymentMethod != PaymentMethodEnum.Cash)
+                return ServiceResult<CheckOutResponse>.Fail(400, "Staff can only create cash bookings", "...");
+
+            // Check Cart
+            var cartItems = await _cartRepository.GetUserCartAsync(patientId);
+            if (!cartItems.Any())
+                return ServiceResult<CheckOutResponse>.Fail(404, "Test basket is empty", "...");
+
+            // Check Tests
+            var testIds = cartItems.Select(se => se.TestCatalogId).ToList();
+
+            var activeTestIds = (await _testCatalogRepository.GetAllAsync())
+                .Where(t => t.IsActive)
+                .Select(t => t.Id)
+                .ToList();
+
+            var allValid = testIds.All(id => activeTestIds.Contains(id));
+            if (!allValid)
+                return ServiceResult<CheckOutResponse>.Fail(403, "One or more tests are inactive or not found", "...");
+
+            // Check Prices
+            var today = DateTime.Today;
+            var prices = await _priceRepository.GetAllAsync();
+
+            var validPrices = prices
+                .Where(p => testIds.Contains(p.TestCatalogId)
+                    && p.BranchId == request.BranchId
+                    && p.EffectiveFrom <= today
+                    && (p.EffectiveTo == null || p.EffectiveTo >= today))
+                .GroupBy(p => p.TestCatalogId)
+                .Select(g => g.OrderByDescending(p => p.EffectiveFrom).First())
+                .ToList();
+
+            if (validPrices.Count != testIds.Count)
+                return ServiceResult<CheckOutResponse>.Fail(403, "Pricing not available for one or more tests in this branch", "...");
+
+            // Check Offers
+            var offers = await _offerRepository.GetAllAsync();
+            var validOffers = offers
+                .Where(o =>
+                    testIds.Contains(o.TestCatalogId) &&
+                    o.BranchId == request.BranchId &&
+                    o.IsActive &&
+                    o.StartDate <= today &&
+                    o.EndDate >= today)
+                .ToList();
+
+            var testsWithNoOffer = testIds
+                .Where(id => !validOffers.Any(o => o.TestCatalogId == id))
+                .ToList();
+
+            if (testsWithNoOffer.Any())
+                return ServiceResult<CheckOutResponse>.Fail(400, "One or more offers are expired or unavailable", "...");
+
+            // Check Date
+            var todayDate = DateOnly.FromDateTime(DateTime.Today);
+            if (request.BookingDate < todayDate)
+                return ServiceResult<CheckOutResponse>.Fail(403, "Booking date cannot be in the past", "...");
+
+            // Check Time Slot Conflict
+            var start = request.BookingTime;
+            var end = start.AddMinutes(SLOT_DURATION);
+
+            var allBookings = await _bookingRepository.GetAllAsync();
+            var hasConflict = allBookings.Any(b =>
+                b.BranchId == request.BranchId &&
+                b.BookingDate == request.BookingDate &&
+                start < b.BookingTime.AddMinutes(SLOT_DURATION) &&
+                end > b.BookingTime);
+
+            if (hasConflict)
+                return ServiceResult<CheckOutResponse>.Fail(403, "This time slot is already booked", "...");
+
+            // Create Booking
+            var booking = new Booking
+            {
+                PatientProfileId = patient.Id,
+                PaymentMethod = PaymentMethodEnum.Cash,
+                TotalAmount = validPrices.Sum(p => p.BasePrice * 1),
+                BranchId = request.BranchId,
+                BookingDate = request.BookingDate,
+                BookingTime = request.BookingTime,
+                Notes = request.Notes,
+                CreatedById = userId,
+                StaffProfileId = staff.IdentityNumber
+            };
+
+            await _bookingRepository.AddAsync(booking);
+
+            // Create Booking Items
+            var bookingItems = new List<BookingItem>();
+            foreach (var cartItem in cartItems)
+            {
+                var bestPrice = validPrices
+                    .FirstOrDefault(p => p.TestCatalogId == cartItem.TestCatalogId);
+
+                var bestOffer = validOffers
+                    .Where(o => o.TestCatalogId == cartItem.TestCatalogId)
+                    .OrderByDescending(o => o.DiscountPercent)
+                    .FirstOrDefault();
+
+                decimal discount = bestOffer != null
+                    ? bestPrice.BasePrice * (bestOffer.DiscountPercent / 100m)
+                    : 0;
+
+                var finalUnitPrice = Math.Max(0, bestPrice.BasePrice - discount);
+
+                bookingItems.Add(new BookingItem
+                {
+                    BookingId = booking.Id,
+                    TestCatalogId = cartItem.TestCatalogId,
+                    UnitPrice = bestPrice.BasePrice,
+                    FinalPrice = finalUnitPrice * cartItem.CountItems,
+                });
+            }
+
+            await _bookingItemRepository.AddRangeAsync(bookingItems);
+            await _cartRepository.ClearCartAsync(patientId);
+
+            // Send Email to Patient
+            await _emailSender.SendEmailAsync(
+                patientUser.Email,
+                "Booking Placed by Staff - eLab",
+                $"<h1>Your booking has been placed by our staff</h1>" +
+                $"<p>Booking ID: {booking.Id}</p>" +
+                $"<p>Total Amount: {booking.TotalAmount}</p>"
+            );
+
+            return ServiceResult<CheckOutResponse>.Ok(new CheckOutResponse
+            {
+                Success = true,
+                Message = "Booking created successfully by staff"
+            });
         }
     }
 }

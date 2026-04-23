@@ -304,7 +304,7 @@
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.OffersController",
     "Method": "Update",
     "RelativePath": "api/admin/Offers/Update/{id}",
-    "HttpMethod": "PUT",
+    "HttpMethod": "PATCH",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -574,7 +574,7 @@
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.PricesController",
     "Method": "Update",
     "RelativePath": "api/admin/Prices/Update/{id}",
-    "HttpMethod": "PUT",
+    "HttpMethod": "PATCH",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -1805,6 +1805,27 @@
       {
         "Name": "id",
         "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.CheckOutsController",
+    "Method": "Payment",
+    "RelativePath": "api/staff/CheckOuts/payment/{patientId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "patientId",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "eLab.DAL.Dto.Requests.CheckOutRequest",
         "IsRequired": true
       }
     ],

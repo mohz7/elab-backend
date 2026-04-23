@@ -13,6 +13,8 @@ namespace eLab.BLL.Services.Interface
     public interface ICheckOutService
     {
         Task<ServiceResult<CheckOutResponse>> ProcessPaymentAsync(CheckOutRequest request, string userId, HttpRequest Request);
+        Task<ServiceResult<CheckOutResponse>> ProcessPaymentByStaffAsync(string patientId ,CheckOutRequest request, string userId, HttpRequest Request);
+
 
         Task<ServiceResult<bool>> HandlePaymentSuccessAsync(int bookingId);
     }

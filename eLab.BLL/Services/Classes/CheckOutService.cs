@@ -62,7 +62,7 @@ namespace eLab.BLL.Services.Classes
 
         public async Task<ServiceResult<bool>> HandlePaymentSuccessAsync(int bookingId)
         {
-            var booking = await _bookingRepository.GetUserByBookingAsync(bookingId);
+            var booking = await _bookingRepository.GetByIdAsync(bookingId);
             var userId = booking.PatientProfile.User.Id;
 
             var subject = "";

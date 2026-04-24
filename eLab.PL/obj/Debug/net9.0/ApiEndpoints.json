@@ -22,6 +22,59 @@
   },
   {
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.BookingsController",
+    "Method": "GetAll",
+    "RelativePath": "api/admin/Bookings/GetAll/{branchId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "branchId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "branchId",
+        "Type": "",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Admin.Controllers.BookingsController",
+    "Method": "GetAllForPatient",
+    "RelativePath": "api/admin/Bookings/GetAllForPatient/{patientId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "patientId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Admin.Controllers.BookingsController",
+    "Method": "GetPatientByBooking",
+    "RelativePath": "api/admin/Bookings/GetPatientByBookingId/{bookingId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookingId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Admin.Controllers.BookingsController",
     "Method": "GetBookingByStatus",
     "RelativePath": "api/admin/Bookings/status/{status}",
     "HttpMethod": "GET",
@@ -1234,6 +1287,16 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.BookingsController",
+    "Method": "GetAllForPatient",
+    "RelativePath": "api/patient/Bookings/GetAllForPatient",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "eLab.PL.Areas.Patient.Controllers.BranchsController",
     "Method": "GetAllPatient",
     "RelativePath": "api/patient/Branchs/GetALl",
@@ -1679,6 +1742,96 @@
       {
         "Name": "id",
         "Type": "",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.BookingsController",
+    "Method": "ChangeOrderStatus",
+    "RelativePath": "api/staff/Bookings/change-status/{orderId}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "newStatus",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.BookingsController",
+    "Method": "GetAll",
+    "RelativePath": "api/staff/Bookings/GetAll/{branchId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "branchId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "branchId",
+        "Type": "",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.BookingsController",
+    "Method": "GetAllForPatient",
+    "RelativePath": "api/staff/Bookings/GetAllForPatient/{patientId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "patientId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.BookingsController",
+    "Method": "GetPatientByBooking",
+    "RelativePath": "api/staff/Bookings/GetPatientByBookingId/{bookingId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookingId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.BookingsController",
+    "Method": "GetBookingByStatus",
+    "RelativePath": "api/staff/Bookings/status/{status}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "status",
+        "Type": "System.String",
         "IsRequired": true
       }
     ],

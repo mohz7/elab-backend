@@ -1,5 +1,6 @@
 ﻿using eLab.DAL.Dto.Responses;
 using eLab.DAL.Models;
+using Midicare_eLab.DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +13,9 @@ namespace eLab.DAL.Repository.Interface
     {
         Task<List<Booking>> GetAllAsync();
         Task<Booking> GetByIdAsync(int bookingId);
-        Task<Booking?> GetUserByBookingAsync(int bookingId);
+        Task<PatientProfile?> GetPatientByBookingAsync(int bookingId);
         Task<Booking> AddAsync(Booking booking);
-        Task<List<Booking>> GetBookingByUserAsync(string patientId);
+        Task<List<Booking>> GetBookingByPatientAsync(string patientId);
         Task<List<Booking>> GetByStatusAsync(Status status);
         Task<bool> ChangeStatusAsync(int bookingId, Status newStatus);
     }

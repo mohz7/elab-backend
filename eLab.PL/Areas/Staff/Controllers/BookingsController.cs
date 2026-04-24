@@ -4,13 +4,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Midicare_eLab.DAL.Models;
 
-namespace eLab.PL.Areas.Admin.Controllers
+namespace eLab.PL.Areas.Staff.Controllers
 {
     [Route("api/[area]/[controller]")]
     [ApiController]
-    [Area("admin")]
-    [Authorize(Roles = "Admin")]
+    [Area("staff")]
+    [Authorize(Roles = "Staff")]
     public class BookingsController : ControllerBase
     {
         private readonly IBookingService _bookingService;
@@ -33,7 +34,6 @@ namespace eLab.PL.Areas.Admin.Controllers
             var result = await _bookingService.GetBookingByPatientAsync(patientId);
             return StatusCode(result.StatusCode, result);
         }
-
         [HttpGet("GetPatientByBookingId/{bookingId}")]
         public async Task<IActionResult> GetPatientByBooking([FromRoute] int bookingId)
         {

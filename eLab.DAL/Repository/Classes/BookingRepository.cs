@@ -26,12 +26,15 @@ namespace eLab.DAL.Repository.Classes
             return booking;
         }
 
-        public async Task<Booking?> GetUserByBookingAsync(int bookingId)
+        public async Task<PatientProfile?> GetPatientByBookingAsync(int bookingId)
         {
-            return await _context.Bookings.Include(o => o.PatientProfile)
+            var booking = await _context.Bookings
+                .Include(o => o.PatientProfile)
                 .FirstOrDefaultAsync(o => o.Id == bookingId);
+
+            return booking?.PatientProfile;
         }
-        public async Task<List<Booking>> GetBookingByUserAsync(string patientId)
+        public async Task<List<Booking>> GetBookingByPatientAsync(string patientId)
         {
             return await _context.Bookings.Where(o => o.PatientProfileId == patientId).ToListAsync();
         }

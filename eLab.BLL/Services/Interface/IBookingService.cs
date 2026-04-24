@@ -13,9 +13,10 @@ namespace eLab.BLL.Services.Interface
 {
     public interface IBookingService
     {
-        Task<ServiceResult<Booking?>> GetUserByBookingAsync(int BookingId);
+        Task<ServiceResult<List<Booking>>> GetAll(int? branchId);
+        Task<ServiceResult<PatientProfileResponse?>> GetUserByBookingAsync(int BookingId);
         Task<ServiceResult<Booking>> AddAsync(Booking booking);
-        Task<ServiceResult<List<Booking>>> GetBookingByUserAsync(string userId);
+        Task<ServiceResult<List<Booking>>> GetBookingByPatientAsync(string patientId);
         Task<ServiceResult<List<Booking>>> GetByStatusAsync(Status status);
         Task<ServiceResult<bool>> ChangeStatusAsync(int orderId, Status newStatus);
     }

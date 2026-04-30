@@ -81,6 +81,14 @@ namespace eLab.PL.Extensions
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
+            // Cart
+            services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<ICartService, CartService>();
+
+
+            // CheckOut
+            services.AddScoped<ICheckOutService, CheckOutService>();
+
             return services;
         }
     }

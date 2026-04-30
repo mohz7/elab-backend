@@ -38,18 +38,19 @@ namespace Midicare_eLab.DAL.Data
         : base(options)
         {
         }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
             builder.Entity<User>().ToTable("User");
             builder.Entity<IdentityRole>().ToTable("Roles");
             builder.Entity<IdentityUserRole<string>>().ToTable("UsersRoles");
-            //ignore
+
+            // ignore
             builder.Ignore<IdentityUserClaim<string>>();
             builder.Ignore<IdentityUserLogin<string>>();
             builder.Ignore<IdentityUserToken<string>>();
             builder.Ignore<IdentityRoleClaim<string>>();
-
 
             // ── StaffProfile ───────────────────────────────────────────────────────
             builder.Entity<StaffProfile>(e =>
@@ -73,13 +74,11 @@ namespace Midicare_eLab.DAL.Data
             // ── PatientProfile ─────────────────────────────────────────────────────
             builder.Entity<PatientProfile>(e =>
             {
-                // المريض نفسه (One-to-One)
                 e.HasOne(pp => pp.User)
                  .WithOne(u => u.PatientProfile)
                  .HasForeignKey<PatientProfile>(pp => pp.UserId)
                  .OnDelete(DeleteBehavior.Restrict);
 
-                // الموظف الذي أنشأ الملف (Many-to-One, nullable)
                 e.HasOne(pp => pp.CreatedBy)
                  .WithMany(u => u.CreatedPatientProfiles)
                  .HasForeignKey(pp => pp.CreatedById)
@@ -112,7 +111,6 @@ namespace Midicare_eLab.DAL.Data
                  .WithMany(t => t.Offers)
                  .HasForeignKey(o => o.TestCatalogId)
                  .OnDelete(DeleteBehavior.Restrict);
-
 
                 e.HasOne(o => o.Branch)
                  .WithMany(b => b.Offers)
@@ -171,6 +169,16 @@ namespace Midicare_eLab.DAL.Data
             builder.Entity<Result>(e =>
             {
                 e.ToTable("Results");
+
+                // stores "Normal" / "High" / "Low" as string in DB
+                e.Property(r => r.ResultFlags)
+                    .HasConversion<string>()
+                    .HasMaxLength(20);
+
+                // stores "Pending" / "Approved" / "Rejected" as string in DB
+                e.Property(r => r.Status)
+                    .HasConversion<string>()
+                    .HasMaxLength(50);
 
                 e.HasOne(res => res.BookingItem)
                  .WithOne(bi => bi.Results)
@@ -306,18 +314,17 @@ namespace Midicare_eLab.DAL.Data
                  .OnDelete(DeleteBehavior.SetNull);
             });
 
-            // ── User ───────────────────────────────────────────────────────
+            // ── User ───────────────────────────────────────────────────────────────
             builder.Entity<User>()
                 .HasIndex(u => u.IdentityNumber)
-            .IsUnique();
+                .IsUnique();
 
-
-            // ── Cart ───────────────────────────────────────────────────────
+            // ── Cart ───────────────────────────────────────────────────────────────
             builder.Entity<Cart>()
-            .HasOne(c => c.User)
-            .WithMany(u => u.Carts)
-            .HasForeignKey(c => c.UserId)
-            .OnDelete(DeleteBehavior.NoAction);
+                .HasOne(c => c.User)
+                .WithMany(u => u.Carts)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

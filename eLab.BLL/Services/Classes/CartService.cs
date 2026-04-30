@@ -52,18 +52,24 @@ namespace eLab.BLL.Services.Classes
                 return ServiceResult<CartSummaryRespones>.Fail(404, "User not found", "...");
 
             var cartItems = await _cartRepository.GetUserCartAsync(UserId);
-            if (!cartItems.Any())
-                return ServiceResult<CartSummaryRespones>.Fail(404, "The user's test basket was not found", "...");
+
+            var now = DateTime.UtcNow;
 
             var response = new CartSummaryRespones
             {
                 Items = cartItems.Select(ic => new CartResponse
                 {
                     TestCatalogId = ic.TestCatalogId,
-                    TestCatalogName = ic.TestCatalog.Name,
-                    //Price = ic.TestCatalog.Price.BasePrice
+                    TestCatalogName = ic.TestCatalog?.Name,
+
+                    Price = ic.TestCatalog?.Prices?
+                        .Where(p => p.EffectiveFrom <= now && p.EffectiveTo >= now)
+                        .Select(p => p.BasePrice)
+                        .FirstOrDefault() ?? 0
+
                 }).ToList()
             };
+
             return ServiceResult<CartSummaryRespones>.Ok(response);
         }
 

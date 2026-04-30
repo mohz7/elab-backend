@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace eLab.DAL.Models
@@ -30,8 +31,10 @@ namespace eLab.DAL.Models
 
         // User
             public string UserId { get; set; }
+            [JsonIgnore]
             public User User { get; set; }
             public string? CreatedById { get; set; }
+            [JsonIgnore]
             public User? CreatedBy { get; set; }
 
         // Branch
@@ -42,6 +45,7 @@ namespace eLab.DAL.Models
         // Reverse Navigation
 
             // Booking
+            [JsonIgnore]
             public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
             // Result

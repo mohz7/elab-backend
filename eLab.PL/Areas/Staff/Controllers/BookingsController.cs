@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Midicare_eLab.DAL.Models;
+using System.Security.Claims;
 
 namespace eLab.PL.Areas.Staff.Controllers
 {
@@ -21,10 +22,11 @@ namespace eLab.PL.Areas.Staff.Controllers
             _bookingService = bookingService;
         }
 
-        [HttpGet("GetAll/{branchId}")]
-        public async Task<IActionResult> GetAll([FromQuery] int? branchId)
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _bookingService.GetAll(branchId);
+            var staffId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _bookingService.GetAll(staffId);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -48,10 +50,10 @@ namespace eLab.PL.Areas.Staff.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpPatch("change-status/{orderId}")]
-        public async Task<IActionResult> ChangeOrderStatus(int orderId, [FromBody] Status newStatus)
+        [HttpPatch("change-status/{bookingId}")]
+        public async Task<IActionResult> ChangeOrderStatus(int bookingId, [FromBody] Status newStatus)
         {
-            var result = await _bookingService.ChangeStatusAsync(orderId, newStatus);
+            var result = await _bookingService.ChangeStatusAsync(bookingId, newStatus);
             return Ok(new { message = "status is changed" });
         }
     }

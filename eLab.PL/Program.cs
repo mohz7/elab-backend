@@ -1,12 +1,10 @@
 using eLab.PL.Helper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Midicare_eLab.DAL.Data;
 using Scalar.AspNetCore;
 using System.Text;
-using Scalar;
 using eLab.BLL.Services.Interface;
 using eLab.BLL.Services.Classes;
 using Microsoft.AspNetCore.Identity;
@@ -27,16 +25,23 @@ namespace eLab.PL
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                options.JsonSerializerOptions.WriteIndented = true;
+            });
 
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    options.JsonSerializerOptions.DefaultIgnoreCondition =
+                        JsonIgnoreCondition.WhenWritingNull;
                 });
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
@@ -51,11 +56,7 @@ namespace eLab.PL
             .AddDefaultTokenProviders();
 
             builder.Services.MapsterConfigRegister();
-
             builder.Services.AddApplicationServices();
-
-            builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
             builder.Services.AddAuthentication(options =>
@@ -71,18 +72,12 @@ namespace eLab.PL
                     ValidateAudience = false,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("jwtOptions")["SecretKey"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(
+                            builder.Configuration.GetSection("jwtOptions")["SecretKey"]))
                 };
             });
 
-            builder.Services.AddControllers()
-            .AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.DefaultIgnoreCondition =
-                    JsonIgnoreCondition.WhenWritingNull;
-            });
-
-            // Configure Stripe settings
             builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
             StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
@@ -98,7 +93,6 @@ namespace eLab.PL
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             app.MapOpenApi();
             app.MapScalarApiReference(options =>
             {
@@ -109,15 +103,11 @@ namespace eLab.PL
             var objectOfSeedData = scope.ServiceProvider.GetRequiredService<ISeedData>();
             await objectOfSeedData.IdentityDataSeedingAsync();
 
-            app.UseHttpsRedirection();
-
-            app.UseCors("AllowFrontend");
-
-            app.UseAuthentication();
-
-            app.UseAuthorization();
-
-            app.MapControllers();
+            app.UseCors("AllowFrontend");   
+            app.UseHttpsRedirection();      
+            app.UseAuthentication();        
+            app.UseAuthorization();         
+            app.MapControllers();           
 
             app.Run();
         }

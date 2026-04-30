@@ -28,12 +28,7 @@ namespace eLab.PL.Areas.patient.Controllers
             var result = await _patientProfileService.GetByPatientAsync(patientId);
             return StatusCode(result.StatusCode, result);
         }
-        [HttpPatch("Update/{id}")]
-        public async Task<IActionResult> Update([FromRoute] string id, [FromBody] RegisterRequest request)
-        {
-            var result = await _patientProfileService.UpdateAsync(id, request);
-            return StatusCode(result.StatusCode, result);
-        }
+
         [HttpPatch("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {

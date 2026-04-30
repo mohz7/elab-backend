@@ -21,14 +21,17 @@ namespace eLab.BLL.Services.Classes
         private readonly IBookingRepository _bookingRepository;
         private readonly UserManager<User> _userManager;
         private readonly IPatientProfileRepository _patientProfileRepository;
+        private readonly IStaffProfileRepository _staffProfileRepository;
 
         public BookingService(IBookingRepository bookingRepository,
             UserManager<User> userManager,
-            IPatientProfileRepository patientProfileRepository)
+            IPatientProfileRepository patientProfileRepository,
+            IStaffProfileRepository staffProfileRepository)
         {
             _bookingRepository = bookingRepository;
             _userManager = userManager;
             _patientProfileRepository = patientProfileRepository;
+            _staffProfileRepository = staffProfileRepository;
         }
 
         public async Task<ServiceResult<Booking>> AddAsync(Booking booking)
@@ -49,7 +52,7 @@ namespace eLab.BLL.Services.Classes
             return ServiceResult<List<Booking>>.Ok(result);
         }
 
-        public async Task<ServiceResult<List<Booking>>> GetBookingByPatientAsync(string patientId)
+        public async Task<ServiceResult<List<BookingResponse>>> GetBookingByPatientAsync(string patientId)
         {
             string identityNumber;
 
@@ -61,17 +64,18 @@ namespace eLab.BLL.Services.Classes
             {
                 var user = await _userManager.FindByIdAsync(patientId);
                 if (user == null)
-                    return ServiceResult<List<Booking>>.Fail(404, "User not found", "...");
+                    return ServiceResult<List<BookingResponse>>.Fail(404, "User not found", "...");
 
                 identityNumber = user.IdentityNumber;
             }
 
             var patient = await _patientProfileRepository.GetByIdAsync(identityNumber);
             if (patient == null)
-                return ServiceResult<List<Booking>>.Fail(404, "Patient not found", "...");
+                return ServiceResult<List<BookingResponse>>.Fail(404, "Patient not found", "...");
 
-            var result = await _bookingRepository.GetBookingByPatientAsync(identityNumber);
-            return ServiceResult<List<Booking>>.Ok(result);
+            var bookings = await _bookingRepository.GetBookingByPatientAsync(identityNumber);
+            var result = bookings.Adapt<List<BookingResponse>>();
+            return ServiceResult<List<BookingResponse>>.Ok(result);
         }
 
         public async Task<ServiceResult<PatientProfileResponse?>> GetUserByBookingAsync(int bookingId)
@@ -100,13 +104,26 @@ namespace eLab.BLL.Services.Classes
             return ServiceResult<PatientProfileResponse>.Ok(result);
         }
 
-        public async Task<ServiceResult<List<Booking>>> GetAll(int? branchId)
+        public async Task<ServiceResult<List<BookingResponse>>> GetAll(int? branchId)
         {
             var bookings = await _bookingRepository.GetAllAsync();
             if(branchId.HasValue)
                 bookings = bookings.Where(bo => bo.BranchId == branchId).ToList();
 
-            return ServiceResult<List<Booking>>.Ok(bookings);
+            var result = bookings.Adapt<List<BookingResponse>>();
+            return ServiceResult<List<BookingResponse>>.Ok(result);
+        }
+
+        public async Task<ServiceResult<List<BookingResponse>>> GetAll(string staffId)
+        {
+            var user = await _userManager.FindByIdAsync(staffId);
+            var staff = await _staffProfileRepository.GetByIdAsync(user.IdentityNumber);
+            var bookings = await _bookingRepository.GetAllAsync();
+            bookings = bookings.Where(pa => pa.BranchId == staff.BranchId)
+                .ToList();
+
+            var result = bookings.Adapt<List<BookingResponse>>();
+            return ServiceResult<List<BookingResponse>>.Ok(result);
         }
     }
 }

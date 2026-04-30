@@ -35,5 +35,12 @@ namespace eLab.PL.Areas.Patient.Controllers
             var result = await _cartService.CartSummaryResponesAsync(UserId);
             return StatusCode(result.StatusCode, result);
         }
+        [HttpDelete]
+        public async Task<IActionResult> ClearCart()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _cartService.ClearCartAsync(userId);
+            return StatusCode(result.StatusCode, result);
+        }
     }
 }

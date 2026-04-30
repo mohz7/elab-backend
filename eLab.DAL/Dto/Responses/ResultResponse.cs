@@ -19,11 +19,8 @@ namespace eLab.DAL.Dto.Responses
         public string? FileUrl { get; set; }
         public string UploadedByName { get; set; }
         public string? ApprovedByName { get; set; }
-
-        // each parameter with its value, flag, and range
         public List<ResultParameterResponse> Parameters { get; set; }
-
-        // summary
+            = new List<ResultParameterResponse>();
         public int TotalParameters { get; set; }
         public int AbnormalCount { get; set; }
         public bool HasAbnormalValues => AbnormalCount > 0;

@@ -13,10 +13,11 @@ namespace eLab.BLL.Services.Interface
     public interface IPatientProfileService
     {
         public Task<ServiceResult<string>> CreateAsync(RegisterRequest request, string adminId);
+        public Task<ServiceResult<string>> CreateByStaffAsync(RegisterRequest request, string staffId);
         public Task<ServiceResult<List<PatientProfileResponse>>> GetAllAsync(int? branchId);
         public Task<ServiceResult<PatientProfileResponse>> GetByIdAsync(string id);
         public Task<ServiceResult<PatientProfileResponse>> GetByPatientAsync(string id);
-        public Task<ServiceResult<string>> UpdateAsync(string id, RegisterRequest request);
+        public Task<ServiceResult<string>> UpdateAsync(string id, UpdatePatientRequest request);
         public Task<ServiceResult<string>> ChangePasswordAsync(string id, ChangePasswordRequest request);
         public Task<ServiceResult<List<PatientProfileResponse>>> GetAllAsync(string staffId);
 

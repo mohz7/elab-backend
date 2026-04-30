@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace eLab.DAL.Models
@@ -43,6 +44,7 @@ namespace eLab.DAL.Models
 
             // PatientProfile
             public string PatientProfileId { get; set; }
+            [JsonIgnore]
             public PatientProfile? PatientProfile { get; set; }
 
             // Branch
@@ -55,6 +57,7 @@ namespace eLab.DAL.Models
 
             // User
             public string? CreatedById { get; set; }
+            [JsonIgnore]
             public User? CreatedBy { get; set; }
 
 

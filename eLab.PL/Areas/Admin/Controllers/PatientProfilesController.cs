@@ -42,7 +42,7 @@ namespace eLab.PL.Areas.Admin.Controllers
             return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("Update/{id}")]
-        public async Task<IActionResult> Update([FromRoute] string id, [FromBody] RegisterRequest request)
+        public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdatePatientRequest request)
         {
             var result = await _patientProfileService.UpdateAsync(id, request);
             return StatusCode(result.StatusCode, result);

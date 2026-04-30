@@ -20,7 +20,7 @@ namespace eLab.PL.Areas.Admin.Controllers
             _bookingService = bookingService;
         }
 
-        [HttpGet("GetAll/{branchId}")]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll([FromQuery] int? branchId)
         {
             var result = await _bookingService.GetAll(branchId);
@@ -48,10 +48,10 @@ namespace eLab.PL.Areas.Admin.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpPatch("change-status/{orderId}")]
-        public async Task<IActionResult> ChangeOrderStatus(int orderId, [FromBody] Status newStatus)
+        [HttpPatch("change-status/{bookingId}")]
+        public async Task<IActionResult> ChangeOrderStatus(int bookingId, [FromBody] Status newStatus)
         {
-            var result = await _bookingService.ChangeStatusAsync(orderId, newStatus);
+            var result = await _bookingService.ChangeStatusAsync(bookingId, newStatus);
             return Ok(new { message = "status is changed" });
         }
     }

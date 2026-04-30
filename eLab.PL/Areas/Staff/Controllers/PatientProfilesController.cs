@@ -38,12 +38,12 @@ namespace eLab.PL.Areas.Staff.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] RegisterRequest request)
         {
-            var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _patientProfileService.CreateAsync(request, adminId);
+            var staffId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _patientProfileService.CreateByStaffAsync(request, staffId);
             return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("Update/{id}")]
-        public async Task<IActionResult> Update([FromRoute] string id, [FromBody] RegisterRequest request)
+        public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdatePatientRequest request)
         {
             var result = await _patientProfileService.UpdateAsync(id, request);
             return StatusCode(result.StatusCode, result);

@@ -36,7 +36,11 @@ namespace eLab.DAL.Repository.Classes
 
         public async Task<List<Cart>> GetUserCartAsync(string UserId)
         {
-            return await _context.Carts.Include(c => c.TestCatalog).Where(c => c.UserId == UserId).ToListAsync();
+            return await _context.Carts
+                .Include(c => c.TestCatalog)
+                    .ThenInclude(t => t.Prices)
+                .Where(c => c.UserId == UserId)
+                .ToListAsync();
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Midicare_eLab.DAL.Models
@@ -45,10 +46,13 @@ namespace Midicare_eLab.DAL.Models
 
             // StaffProfile
             public StaffProfile StaffProfile { get; set; }
+            [JsonIgnore]
             public ICollection<StaffProfile> StaffProfiles { get; set; } = new List<StaffProfile>();
 
             // PatientProfile
+            [JsonIgnore]
             public PatientProfile PatientProfile { get; set; }
+            [JsonIgnore]
             public ICollection<PatientProfile> CreatedPatientProfiles { get; set; } = new List<PatientProfile>();
 
             // TestCatalog
@@ -61,6 +65,7 @@ namespace Midicare_eLab.DAL.Models
             public ICollection<Offer> Offers { get; set; } = new List<Offer>();
 
             // Booking
+            [JsonIgnore]
             public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
             // Result
@@ -77,9 +82,11 @@ namespace Midicare_eLab.DAL.Models
             public ICollection<AIChatMessage> AIChatMessages { get; set; } = new List<AIChatMessage>();
 
             // Notification
+            [JsonIgnore]
             public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
             // Cart
+            [JsonIgnore]
             public ICollection<Cart> Carts { get; set; } = new List<Cart>();
     }
 }

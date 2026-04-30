@@ -10,9 +10,8 @@ namespace eLab.DAL.Models
     public enum ResultStatus
     {
         Pending,
+        PendingApproval,
         Approved,
-        Uploaded,
-        Reviewed,
         Rejected
     }
     public enum ResultFlags

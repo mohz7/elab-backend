@@ -171,7 +171,7 @@ namespace eLab.BLL.Services.Classes
             return ServiceResult<string>.Ok("Remove successfully");
         }
 
-        public async Task<ServiceResult<string>> UpdateAsync(string id, StaffProfileRequest request)
+        public async Task<ServiceResult<string>> UpdateAsync(string id, UpdateStaffProfileRequest request)
         {
             var staff = await _staffProfileRepository.GetByIdAsync(id);
             if (staff is null)
@@ -184,13 +184,17 @@ namespace eLab.BLL.Services.Classes
 
                 staff.JobTitle = jobTitle;
             }
-            staff.User.IdentityNumber = request.IdentityNumber != null ? request.IdentityNumber : staff.User.IdentityNumber;
-            staff.User.FullName = request.FullName != null ? request.FullName : staff.User.FullName;
-            staff.User.Email = request.Email != null ? request.Email : staff.User.Email;
-            staff.User.Gender = request.Gender != null ? request.Gender : staff.User.Gender;
-            staff.User.DateOfBirth = request.DateOfBirth != null ? request.DateOfBirth : staff.User.DateOfBirth;
-            staff.User.PhoneNumber = request.PhoneNumber != null ? request.PhoneNumber : staff.User.PhoneNumber;
-            staff.User.UserName = request.UserName != null ? request.UserName : staff.User.UserName;
+
+            staff.User.IdentityNumber = request.IdentityNumber ?? staff.User.IdentityNumber;
+            staff.User.FullName = request.FullName ?? staff.User.FullName;
+            staff.User.Email = request.Email ?? staff.User.Email;
+            staff.User.Gender = request.Gender ?? staff.User.Gender;
+            staff.User.DateOfBirth = request.DateOfBirth ?? staff.User.DateOfBirth;
+            staff.User.PhoneNumber = request.PhoneNumber ?? staff.User.PhoneNumber;
+            staff.User.UserName = request.UserName ?? staff.User.UserName;
+
+            if (request.BranchId.HasValue)
+                staff.BranchId = request.BranchId.Value;
 
             var result = await _staffProfileRepository.UpdateAsync(staff);
             if (result < 1)

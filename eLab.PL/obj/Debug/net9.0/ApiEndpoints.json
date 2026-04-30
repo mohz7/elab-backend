@@ -2,13 +2,13 @@
   {
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.BookingsController",
     "Method": "ChangeOrderStatus",
-    "RelativePath": "api/admin/Bookings/change-status/{orderId}",
+    "RelativePath": "api/admin/Bookings/change-status/{bookingId}",
     "HttpMethod": "PATCH",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "orderId",
+        "Name": "bookingId",
         "Type": "System.Int32",
         "IsRequired": true
       },
@@ -23,7 +23,7 @@
   {
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.BookingsController",
     "Method": "GetAll",
-    "RelativePath": "api/admin/Bookings/GetAll/{branchId}",
+    "RelativePath": "api/admin/Bookings/GetAll",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -32,11 +32,6 @@
         "Name": "branchId",
         "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
-      },
-      {
-        "Name": "branchId",
-        "Type": "",
-        "IsRequired": true
       }
     ],
     "ReturnTypes": []
@@ -458,7 +453,7 @@
       },
       {
         "Name": "request",
-        "Type": "eLab.DAL.DTO.Requests.RegisterRequest",
+        "Type": "eLab.DAL.Dto.Requests.UpdatePatientRequest",
         "IsRequired": true
       }
     ],
@@ -997,7 +992,7 @@
       },
       {
         "Name": "request",
-        "Type": "eLab.DAL.Dto.Requests.StaffProfileRequest",
+        "Type": "eLab.DAL.Dto.Requests.UpdateStaffProfileRequest",
         "IsRequired": true
       }
     ],
@@ -1349,6 +1344,16 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.CartsController",
+    "Method": "ClearCart",
+    "RelativePath": "api/patient/Carts",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "eLab.PL.Areas.Patient.Controllers.ChatsController",
     "Method": "CreateSession",
     "RelativePath": "api/patient/Chats/sessions",
@@ -1596,27 +1601,6 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "eLab.PL.Areas.patient.Controllers.PatientProfilesController",
-    "Method": "Update",
-    "RelativePath": "api/patient/PatientProfiles/Update/{id}",
-    "HttpMethod": "PATCH",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.String",
-        "IsRequired": true
-      },
-      {
-        "Name": "request",
-        "Type": "eLab.DAL.DTO.Requests.RegisterRequest",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
     "ContainingType": "eLab.PL.Areas.Patient.Controllers.PricesController",
     "Method": "GetAll",
     "RelativePath": "api/patient/Prices/GetALl",
@@ -1750,13 +1734,13 @@
   {
     "ContainingType": "eLab.PL.Areas.Staff.Controllers.BookingsController",
     "Method": "ChangeOrderStatus",
-    "RelativePath": "api/staff/Bookings/change-status/{orderId}",
+    "RelativePath": "api/staff/Bookings/change-status/{bookingId}",
     "HttpMethod": "PATCH",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "orderId",
+        "Name": "bookingId",
         "Type": "System.Int32",
         "IsRequired": true
       },
@@ -1771,22 +1755,11 @@
   {
     "ContainingType": "eLab.PL.Areas.Staff.Controllers.BookingsController",
     "Method": "GetAll",
-    "RelativePath": "api/staff/Bookings/GetAll/{branchId}",
+    "RelativePath": "api/staff/Bookings/GetAll",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [
-      {
-        "Name": "branchId",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
-      },
-      {
-        "Name": "branchId",
-        "Type": "",
-        "IsRequired": true
-      }
-    ],
+    "Parameters": [],
     "ReturnTypes": []
   },
   {
@@ -2204,7 +2177,7 @@
       },
       {
         "Name": "request",
-        "Type": "eLab.DAL.DTO.Requests.RegisterRequest",
+        "Type": "eLab.DAL.Dto.Requests.UpdatePatientRequest",
         "IsRequired": true
       }
     ],

@@ -125,5 +125,14 @@ namespace eLab.BLL.Services.Classes
             var result = bookings.Adapt<List<BookingResponse>>();
             return ServiceResult<List<BookingResponse>>.Ok(result);
         }
+
+        public async Task<ServiceResult<BookingResponse>> GetByIdAsync(int bookingId)
+        {
+            var booking = await _bookingRepository.GetByIdAsync(bookingId);
+            if (booking is null)
+                return ServiceResult<BookingResponse>.Fail(404, "Booking not found", "...");
+            var result = booking.Adapt<BookingResponse>();
+            return ServiceResult<BookingResponse>.Ok(result);
+        }
     }
 }

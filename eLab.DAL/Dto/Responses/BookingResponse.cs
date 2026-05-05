@@ -20,7 +20,7 @@ namespace eLab.DAL.Dto.Responses
         public DateTime CreatedAt { get; set; }
         public int BranchId { get; set; }
         public string PatientProfileId { get; set; }
-
+        public List<BookingItemResponse> BookingItems { get; set; } = new();
 
     }
 }

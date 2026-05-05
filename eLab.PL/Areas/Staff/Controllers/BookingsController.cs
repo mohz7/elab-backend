@@ -30,6 +30,13 @@ namespace eLab.PL.Areas.Staff.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpGet("GetByBookingId/{bookingId}")]
+        public async Task<IActionResult> GetByBookingId([FromRoute] int bookingId)
+        {
+            var result = await _bookingService.GetByIdAsync(bookingId);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpGet("GetAllForPatient/{patientId}")]
         public async Task<IActionResult> GetAllForPatient([FromRoute] string patientId)
         {

@@ -63,70 +63,66 @@ namespace eLab.BLL.Services.Classes
         {
             var booking = await _bookingRepository.GetByIdAsync(bookingId);
             var userId = booking.PatientProfile.User.Id;
-
-            var subject = "";
-            var body = "";
-
             var today = DateTime.Today;
             var prices = await _priceRepository.GetAllAsync();
             var offers = await _offerRepository.GetAllAsync();
+            var carts = await _cartRepository.GetUserCartAsync(userId);
+
+            // ✅ خزن BookingItems للـ Visa والـ Cash
+            var bookingItems = new List<BookingItem>();
+            foreach (var cartItem in carts)
+            {
+                var bestPrice = prices
+                    .Where(p => p.TestCatalogId == cartItem.TestCatalogId
+                        && p.BranchId == booking.BranchId
+                        && p.EffectiveFrom <= today
+                        && (p.EffectiveTo == null || p.EffectiveTo >= today))
+                    .OrderByDescending(p => p.EffectiveFrom)
+                    .FirstOrDefault();
+
+                var bestOffer = offers
+                    .Where(o => o.TestCatalogId == cartItem.TestCatalogId &&
+                        o.BranchId == booking.BranchId &&
+                        o.IsActive &&
+                        o.StartDate <= today &&
+                        o.EndDate >= today)
+                    .OrderByDescending(o => o.DiscountPercent)
+                    .FirstOrDefault();
+
+                decimal discount = bestOffer != null
+                    ? bestPrice.BasePrice * (bestOffer.DiscountPercent / 100m)
+                    : 0;
+
+                var finalUnitPrice = Math.Max(0, bestPrice.BasePrice - discount);
+
+                bookingItems.Add(new BookingItem
+                {
+                    BookingId = bookingId,
+                    TestCatalogId = cartItem.TestCatalogId,
+                    FinalPrice = finalUnitPrice * cartItem.CountItems,
+                    UnitPrice = bestPrice.BasePrice,
+                });
+            }
+
+            await _bookingItemRepository.AddRangeAsync(bookingItems);
+            await _cartRepository.ClearCartAsync(userId);
+
+            string subject, body;
 
             if (booking.PaymentMethod == PaymentMethodEnum.Visa)
             {
                 booking.Status = Status.Confirmed;
-
-                var carts = await _cartRepository.GetUserCartAsync(userId);
-                var bookingItems = new List<BookingItem>();
-
-                foreach (var cartItem in carts)
-                {
-                    var bestPrice = prices
-                        .Where(p => p.TestCatalogId == cartItem.TestCatalogId
-                            && p.BranchId == booking.BranchId
-                            && p.EffectiveFrom <= today
-                            && (p.EffectiveTo == null || p.EffectiveTo >= today))
-                        .OrderByDescending(p => p.EffectiveFrom)
-                        .FirstOrDefault();
-
-                    var bestOffer = offers
-                        .Where(o =>
-                            o.TestCatalogId == cartItem.TestCatalogId &&
-                            o.BranchId == booking.BranchId &&
-                            o.IsActive &&
-                            o.StartDate <= today &&
-                            o.EndDate >= today)
-                        .OrderByDescending(o => o.DiscountPercent)
-                        .FirstOrDefault();
-
-                    decimal discount = bestOffer != null
-                        ? bestPrice.BasePrice * (bestOffer.DiscountPercent / 100m)
-                        : 0;
-
-                    var finalUnitPrice = Math.Max(0, bestPrice.BasePrice - discount);
-
-                    bookingItems.Add(new BookingItem
-                    {
-                        BookingId = bookingId,
-                        TestCatalogId = cartItem.TestCatalogId,
-                        FinalPrice = finalUnitPrice * cartItem.CountItems,
-                        UnitPrice = bestPrice.BasePrice,
-                    });
-                }
-
-                await _bookingItemRepository.AddRangeAsync(bookingItems);
-                await _cartRepository.ClearCartAsync(userId);
-
                 subject = "Payment successful - eLab";
-                body = "<h1>thank you for your payment</h1>" +
-                    $"<p>your payment for booking {bookingId}</p>" +
-                    $"<p>total Amount {booking.TotalAmount}</p>";
+                body = $"<h1>Thank you for your payment</h1>" +
+                       $"<p>Booking ID: {bookingId}</p>" +
+                       $"<p>Total Amount: {booking.TotalAmount}</p>";
             }
-            else if (booking.PaymentMethod == PaymentMethodEnum.Cash)
+            else
             {
                 subject = "Booking Placed successfully - eLab";
-                body = "<h1>thank you for your booking</h1>" +
-                    $"<p>your payment for booking {bookingId}</p>" +
-                    $"<p>total Amount {booking.TotalAmount}</p>";
+                body = $"<h1>Thank you for your booking</h1>" +
+                       $"<p>Booking ID: {bookingId}</p>" +
+                       $"<p>Total Amount: {booking.TotalAmount}</p>";
             }
 
             await _emailSender.SendEmailAsync(booking.PatientProfile.User.Email, subject, body);
@@ -195,7 +191,6 @@ namespace eLab.BLL.Services.Classes
                     o.EndDate >= today)
                 .ToList();
 
-            // ✅ حساب الـ TotalAmount مع الـ discount
             decimal totalAmount = 0;
             foreach (var price in validPrices)
             {
@@ -238,7 +233,7 @@ namespace eLab.BLL.Services.Classes
             {
                 PatientProfileId = patient.Id,
                 PaymentMethod = request.PaymentMethod,
-                TotalAmount = totalAmount, // ✅ بيحسب مع الـ discount
+                TotalAmount = totalAmount,
                 BranchId = request.BranchId,
                 BookingDate = request.BookingDate,
                 BookingTime = request.BookingTime,
@@ -249,12 +244,13 @@ namespace eLab.BLL.Services.Classes
 
             if (request.PaymentMethod == PaymentMethodEnum.Cash)
             {
-                result = new CheckOutResponse
+                await HandlePaymentSuccessAsync(booking.Id);
+
+                return ServiceResult<CheckOutResponse>.Ok(new CheckOutResponse
                 {
                     Success = true,
                     Message = "cash"
-                };
-                return ServiceResult<CheckOutResponse>.Ok(result);
+                });
             }
 
             if (request.PaymentMethod == PaymentMethodEnum.Visa)
@@ -282,7 +278,6 @@ namespace eLab.BLL.Services.Classes
                         ? itemPrice.BasePrice * (itemOffer.DiscountPercent / 100m)
                         : 0;
 
-                    // ✅ السعر النهائي للـ Stripe بعد الـ discount
                     long finalUnitAmount = (long)Math.Max(0, itemPrice.BasePrice - itemDiscount);
 
                     options.LineItems.Add(new SessionLineItemOptions

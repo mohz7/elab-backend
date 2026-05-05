@@ -15,6 +15,7 @@ namespace eLab.BLL.Services.Interface
     {
         Task<ServiceResult<List<BookingResponse>>> GetAll(int? branchId);
         Task<ServiceResult<List<BookingResponse>>> GetAll(string staffId);
+        Task<ServiceResult<BookingResponse>> GetByIdAsync(int bookingId);
         Task<ServiceResult<PatientProfileResponse?>> GetUserByBookingAsync(int BookingId);
         Task<ServiceResult<Booking>> AddAsync(Booking booking);
         Task<ServiceResult<List<BookingResponse>>> GetBookingByPatientAsync(string patientId);

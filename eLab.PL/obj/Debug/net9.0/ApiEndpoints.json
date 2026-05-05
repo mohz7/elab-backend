@@ -54,6 +54,22 @@
   },
   {
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.BookingsController",
+    "Method": "GetByBookingId",
+    "RelativePath": "api/admin/Bookings/GetByBookingId/{bookingId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookingId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Admin.Controllers.BookingsController",
     "Method": "GetPatientByBooking",
     "RelativePath": "api/admin/Bookings/GetPatientByBookingId/{bookingId}",
     "HttpMethod": "GET",
@@ -1773,6 +1789,22 @@
       {
         "Name": "patientId",
         "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.BookingsController",
+    "Method": "GetByBookingId",
+    "RelativePath": "api/staff/Bookings/GetByBookingId/{bookingId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookingId",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],

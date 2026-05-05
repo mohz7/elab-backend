@@ -1,5 +1,6 @@
 ﻿using eLab.DAL.Models;
 using eLab.DAL.Repository.Interface;
+using Microsoft.EntityFrameworkCore;
 using Midicare_eLab.DAL.Data;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,11 @@ namespace eLab.DAL.Repository.Classes
 
         public async Task<BookingItem> GetByIdAsync(int id)
         {
-            return await _context.BookingItems.FindAsync(id);
+            return await _context.BookingItems
+                .Include(bi => bi.Booking) // ✅
+                .Include(bi => bi.TestCatalog)
+                .Include(bi => bi.Offer)
+                .FirstOrDefaultAsync(bi => bi.Id == id);
         }
     }
 }

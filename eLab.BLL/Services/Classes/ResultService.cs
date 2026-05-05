@@ -65,9 +65,7 @@ namespace eLab.BLL.Services.Classes
                 .GetByTemplateIdAsync(dto.ReportTemplateId, patient.User.Age, patient.User.Gender);
 
             var overallFlag = EvaluateOverallFlag(dto.ResultData, ranges);
-
             var resultDataJson = JsonSerializer.Serialize(dto.ResultData);
-            
 
             var result = new Result
             {
@@ -80,7 +78,7 @@ namespace eLab.BLL.Services.Classes
                 ResultFlags = overallFlag,
                 Status = ResultStatus.Pending,
                 FileUrl = dto.FileUrl,
-                UploadedAt = DateTime.UtcNow
+                UploadedAt = DateTime.UtcNow,
             };
 
             await _resultRepository.AddAsync(result);
@@ -94,7 +92,10 @@ namespace eLab.BLL.Services.Classes
                 CreatedAt = DateTime.UtcNow
             });
 
-            var response = await BuildResponseDto(result, ranges);
+            // ✅ اجلبه من DB مع كل الـ Includes
+            var savedResult = await _resultRepository.GetByIdAsync(result.Id);
+
+            var response = await BuildResponseDto(savedResult!, ranges);
             return ServiceResult<ResultResponse>.Ok(response);
         }
 
@@ -118,10 +119,9 @@ namespace eLab.BLL.Services.Classes
                 result.ApprovedById = staffUserId;
                 result.ReviewedAt = DateTime.UtcNow;
 
-
                 await _notificationRepository.CreateAsync(new Notification
                 {
-                    UserId = result.PatientProfile.UserId,
+                    UserId = result.PatientProfile!.UserId,
                     ResultId = result.Id,
                     Type = NotificationType.ResultReady,
                     Message = "Your lab result is ready. You can now view it.",
@@ -137,12 +137,15 @@ namespace eLab.BLL.Services.Classes
 
             await _resultRepository.UpdateAsync(result);
 
-            var ranges = await _referenceRangeRepository
-                .GetByTemplateIdAsync(result.ReportTemplateId!.Value,
-                    result.PatientProfile.User.Age,
-                    result.PatientProfile.User.Gender);
+            // ✅ اجلبه من DB بعد الـ Update عشان يحمل ApprovedBy
+            var updatedResult = await _resultRepository.GetByIdAsync(resultId);
 
-            var response = await BuildResponseDto(result, ranges);
+            var ranges = await _referenceRangeRepository
+                .GetByTemplateIdAsync(updatedResult!.ReportTemplateId!.Value,
+                    updatedResult.PatientProfile!.User.Age,
+                    updatedResult.PatientProfile.User.Gender);
+
+            var response = await BuildResponseDto(updatedResult, ranges);
             return ServiceResult<ResultResponse>.Ok(response);
         }
 
@@ -155,18 +158,16 @@ namespace eLab.BLL.Services.Classes
             if (result == null)
                 return ServiceResult<ResultResponse>.Fail(404, "Result not found.", "...");
 
-            // ✅ المستخدم اللي طلب
             var requestingUser = await _userManager.FindByIdAsync(requestingUserId);
 
             if (requestingUser == null)
                 return ServiceResult<ResultResponse>.Fail(404, "User not found.", "...");
 
-            // ✅ تحقق من الدور
             var isPatient = await _userManager.IsInRoleAsync(requestingUser, "Patient");
 
             if (isPatient)
             {
-                if (result.PatientProfile.UserId != requestingUserId)
+                if (result.PatientProfile!.UserId != requestingUserId)
                     return ServiceResult<ResultResponse>.Fail(403, "Access denied.", "...");
 
                 if (result.Status != ResultStatus.Approved)
@@ -175,7 +176,7 @@ namespace eLab.BLL.Services.Classes
 
             var ranges = await _referenceRangeRepository.GetByTemplateIdAsync(
                 result.ReportTemplateId!.Value,
-                result.PatientProfile.User.Age,
+                result.PatientProfile!.User.Age,
                 result.PatientProfile.User.Gender);
 
             var response = await BuildResponseDto(result, ranges);
@@ -210,7 +211,8 @@ namespace eLab.BLL.Services.Classes
         public async Task<ServiceResult<List<ResultSummaryResponse>>> GetPendingApprovalAsync(
             string staffUserId)
         {
-            var staff = await _staffProfileRepository.GetByIdAsync(staffUserId);
+            var user = await _userManager.FindByIdAsync(staffUserId);
+            var staff = await _staffProfileRepository.GetByIdAsync(user.IdentityNumber);
             if (staff == null)
                 return ServiceResult<List<ResultSummaryResponse>>.Fail(404, "Staff profile not found.", "...");
 
@@ -235,6 +237,7 @@ namespace eLab.BLL.Services.Classes
             IEnumerable<ReferenceRange> ranges)
         {
             bool hasLow = false;
+            bool hasHigh = false;
 
             var rangeDict = ranges.ToDictionary(
                 r => r.FieldName,
@@ -246,13 +249,15 @@ namespace eLab.BLL.Services.Classes
                     continue;
 
                 if (value > range.ValueMax)
-                    return ResultFlags.High;
+                    hasHigh = true;
 
                 if (value < range.ValueMin)
                     hasLow = true;
             }
 
-            return hasLow ? ResultFlags.Low : ResultFlags.Normal;
+            if (hasHigh) return ResultFlags.High;
+            if (hasLow) return ResultFlags.Low;
+            return ResultFlags.Normal;
         }
 
         // ── Deserialize Flags ─────────────────────────────────────
@@ -269,7 +274,7 @@ namespace eLab.BLL.Services.Classes
 
         // ── Build Response DTO ────────────────────────────────────
         private async Task<ResultResponse> BuildResponseDto(
-     Result result, IEnumerable<ReferenceRange> ranges)
+            Result result, IEnumerable<ReferenceRange> ranges)
         {
             var resultData = string.IsNullOrEmpty(result.ResultData)
                 ? new Dictionary<string, decimal>()
@@ -280,18 +285,29 @@ namespace eLab.BLL.Services.Classes
                 var range = ranges.FirstOrDefault(r =>
                     r.FieldName.Equals(kvp.Key, StringComparison.OrdinalIgnoreCase));
 
+                // ✅ احسب flag لكل parameter لحاله
+                ResultFlags paramFlag = ResultFlags.Normal;
+                if (range != null)
+                {
+                    if (kvp.Value > range.ValueMax)
+                        paramFlag = ResultFlags.High;
+                    else if (kvp.Value < range.ValueMin)
+                        paramFlag = ResultFlags.Low;
+                }
+
                 return new ResultParameterResponse
                 {
                     ParameterName = kvp.Key,
                     Value = kvp.Value,
-                    Flag = result.ResultFlags,
+                    Flag = paramFlag, // ✅ بدل result.ResultFlags
                     RangeMin = range?.ValueMin,
                     RangeMax = range?.ValueMax,
                     Unit = range?.Units
                 };
             }).ToList();
 
-            var abnormalCount = result.ResultFlags == ResultFlags.Normal ? 0 : 1;
+            // ✅ احسب abnormalCount من الـ parameters الفعلية
+            var abnormalCount = parameters.Count(p => p.Flag != ResultFlags.Normal);
 
             return new ResultResponse
             {
@@ -307,7 +323,7 @@ namespace eLab.BLL.Services.Classes
                 ApprovedByName = result.ApprovedBy?.FullName,
                 Parameters = parameters,
                 TotalParameters = parameters.Count,
-                AbnormalCount = abnormalCount
+                AbnormalCount = abnormalCount,
             };
         }
     }

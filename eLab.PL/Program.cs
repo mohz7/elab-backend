@@ -13,7 +13,7 @@ using eLab.DAL.Utils;
 using eLab.DAL.Repository.Interface;
 using eLab.DAL.Repository.Classes;
 using eLab.PL.Extensions;
-using eLab.BLL.MapsterConfigurations.MapsterReportTemplate;
+using eLab.BLL.MapsterConfigurations.MapsterBookingItem;
 using System.Text.Json.Serialization;
 using Stripe;
 

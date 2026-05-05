@@ -10,7 +10,7 @@ namespace eLab.DAL.Dto.Responses
     {
         public int Id { get; set; }
 
-        public string TestCatalog { get; set; }
+        public string TestName { get; set; }
 
         public decimal UnitPrice { get; set; }
 

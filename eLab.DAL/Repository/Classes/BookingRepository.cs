@@ -1,4 +1,5 @@
-﻿using eLab.DAL.Models;
+﻿using eLab.DAL.Dto.Requests;
+using eLab.DAL.Models;
 using eLab.DAL.Repository.Interface;
 using Microsoft.EntityFrameworkCore;
 using Midicare_eLab.DAL.Data;
@@ -43,11 +44,12 @@ namespace eLab.DAL.Repository.Classes
             return await _context.Bookings.Where(o => o.Status == status)
                 .OrderByDescending(o => o.BookingDate).ToListAsync();
         }
-        public async Task<bool> ChangeStatusAsync(int orderId, Status newStatus)
+        public async Task<bool> ChangeStatusAsync(int bookingId, Change_statusRequest newStatus)
         {
-            var booking = await _context.Bookings.FindAsync(orderId);
+            var booking = await _context.Bookings.FindAsync(bookingId);
             if (booking is null) return false;
-            booking.Status = newStatus;
+            booking.Status = newStatus.Status;
+            booking.PaymentStatus = newStatus.PaymentStatus;
             var result = await _context.SaveChangesAsync();
             return result > 0;
         }
@@ -61,13 +63,25 @@ namespace eLab.DAL.Repository.Classes
         {
             return await _context.Bookings
                 .Include(bo => bo.Branch)
+
+                .Include(bo => bo.PatientProfile)
+                    .ThenInclude(pp => pp.User)
+
                 .Include(bo => bo.StaffProfile)
                     .ThenInclude(sp => sp.User)
+
                 .Include(bo => bo.BookingItems)
                     .ThenInclude(bi => bi.TestCatalog)
+
                 .Include(bo => bo.BookingItems)
                     .ThenInclude(bi => bi.Offer)
+
                 .FirstOrDefaultAsync(bo => bo.Id == bookingId);
+        }
+        public async Task UpdateAsync(Booking booking)
+        {
+            _context.Bookings.Update(booking);
+            await _context.SaveChangesAsync();
         }
     }
 }

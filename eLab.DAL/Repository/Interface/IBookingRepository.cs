@@ -1,4 +1,5 @@
-﻿using eLab.DAL.Dto.Responses;
+﻿using eLab.DAL.Dto.Requests;
+using eLab.DAL.Dto.Responses;
 using eLab.DAL.Models;
 using Midicare_eLab.DAL.Models;
 using System;
@@ -17,6 +18,8 @@ namespace eLab.DAL.Repository.Interface
         Task<Booking> AddAsync(Booking booking);
         Task<List<Booking>> GetBookingByPatientAsync(string patientId);
         Task<List<Booking>> GetByStatusAsync(Status status);
-        Task<bool> ChangeStatusAsync(int bookingId, Status newStatus);
+        Task<bool> ChangeStatusAsync(int bookingId, Change_statusRequest newStatus);
+        Task UpdateAsync(Booking booking);
+
     }
 }

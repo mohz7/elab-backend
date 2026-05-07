@@ -2,6 +2,7 @@
 using eLab.DAL.Repository.Interface;
 using Microsoft.EntityFrameworkCore;
 using Midicare_eLab.DAL.Data;
+using Midicare_eLab.DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,6 +75,21 @@ namespace eLab.DAL.Repository.Classes
         {
             _context.Results.Update(result);
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<Result>> GetAll()
+        {
+            return await _context.Results
+                .Include(r => r.BookingItem)
+                    .ThenInclude(bi => bi.TestCatalog)
+                .Include(r => r.BookingItem)
+                    .ThenInclude(bi => bi.Booking) 
+                .Include(r => r.ReportTemplate)
+                .Include(r => r.UploadedBy)
+                .Include(r => r.ApprovedBy)
+                .Include(r => r.PatientProfile)
+                    .ThenInclude(p => p.User)
+                .ToListAsync();
         }
     }
 }

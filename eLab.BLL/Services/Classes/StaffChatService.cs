@@ -5,6 +5,8 @@ using eLab.DAL.Dto.Responses;
 using eLab.DAL.Models;
 using eLab.DAL.Repository.Interface;
 using Mapster;
+using Microsoft.AspNetCore.Identity;
+using Midicare_eLab.DAL.Models;
 
 namespace eLab.BLL.Services.Classes
 {
@@ -12,18 +14,22 @@ namespace eLab.BLL.Services.Classes
     {
         private readonly IStaffChatRepository _staffChatRepository;
         private readonly IBookingRepository _bookingRepository;
+        private readonly UserManager<User> _userManager;
 
         public StaffChatService(
             IStaffChatRepository staffChatRepository,
-            IBookingRepository bookingRepository)
+            IBookingRepository bookingRepository,
+            UserManager<User> userManager)
         {
             _staffChatRepository = staffChatRepository;
             _bookingRepository = bookingRepository;
+            _userManager = userManager;
         }
 
         // 🔹 Create Chat Session
         public async Task<ServiceResult<StaffChatSessionResponse>> CreateSessionAsync(int bookingId, string patientId)
         {
+            var user = await _userManager.FindByIdAsync(patientId);
             if (await _staffChatRepository.SessionExistsForBookingAsync(bookingId))
                 return ServiceResult<StaffChatSessionResponse>.Fail(400, "A chat session already exists for this booking.", "...");
 
@@ -31,7 +37,7 @@ namespace eLab.BLL.Services.Classes
             if (booking is null)
                 return ServiceResult<StaffChatSessionResponse>.Fail(404, "Booking not found.", "...");
 
-            if (booking.PatientProfileId != patientId)
+            if (booking.PatientProfileId != user.IdentityNumber)
                 return ServiceResult<StaffChatSessionResponse>.Fail(403, "You are not allowed to create this session.", "...");
 
             var chat = new StaffChat

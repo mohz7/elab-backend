@@ -31,6 +31,8 @@ namespace eLab.DAL.Repository.Classes
                 .Include(r => r.PatientProfile).ThenInclude(p => p.User)
                 .Include(r => r.Booking)
                 .Include(r => r.Result)
+                    .ThenInclude(r => r.BookingItem)
+                        .ThenInclude(bi => bi.TestCatalog) 
                 .Include(r => r.Branch)
                 .ToListAsync();
         }
@@ -41,6 +43,8 @@ namespace eLab.DAL.Repository.Classes
                 .Include(r => r.PatientProfile).ThenInclude(p => p.User)
                 .Include(r => r.Booking)
                 .Include(r => r.Result)
+                    .ThenInclude(r => r.BookingItem)
+                        .ThenInclude(bi => bi.TestCatalog) 
                 .Include(r => r.Branch)
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
@@ -48,14 +52,15 @@ namespace eLab.DAL.Repository.Classes
         public async Task<List<PatientRecord>> GetByPatientProfileIdAsync(string patientProfileId)
         {
             return await _context.PatientRecords
-                .Include(par => par.PatientProfile)
-                .ThenInclude(pa => pa.User)
-                .Include(par => par.Booking)
-                .Include(par => par.Result).Include(par => par.Branch)
-                .Where(par => par.PatientProfileId == patientProfileId)
+                .Include(r => r.PatientProfile).ThenInclude(p => p.User)
+                .Include(r => r.Booking)
+                .Include(r => r.Result)
+                    .ThenInclude(r => r.BookingItem)
+                        .ThenInclude(bi => bi.TestCatalog)
+                .Include(r => r.Branch)
+                .Where(r => r.PatientProfileId == patientProfileId)
                 .ToListAsync();
         }
-
         public async Task<int> RemoveAsync(PatientRecord patientRecord)
         {
             _context.PatientRecords.Remove(patientRecord);

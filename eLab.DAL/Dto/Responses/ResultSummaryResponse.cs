@@ -15,5 +15,7 @@ namespace eLab.DAL.Dto.Responses
         public ResultStatus Status { get; set; }
         public int AbnormalCount { get; set; }
         public bool HasAbnormalValues { get; set; }
+        public DateTime UploadedAt { get; set; }
+
     }
 }

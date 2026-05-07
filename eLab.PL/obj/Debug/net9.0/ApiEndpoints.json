@@ -14,7 +14,7 @@
       },
       {
         "Name": "newStatus",
-        "Type": "System.String",
+        "Type": "eLab.DAL.Dto.Requests.Change_statusRequest",
         "IsRequired": true
       }
     ],
@@ -890,12 +890,39 @@
   },
   {
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.ResultController",
+    "Method": "GetAll",
+    "RelativePath": "api/admin/Result/GetAll",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "branchId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Admin.Controllers.ResultController",
     "Method": "GetPending",
     "RelativePath": "api/admin/Result/pending",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "branchId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -1762,7 +1789,7 @@
       },
       {
         "Name": "newStatus",
-        "Type": "System.String",
+        "Type": "eLab.DAL.Dto.Requests.Change_statusRequest",
         "IsRequired": true
       }
     ],
@@ -2362,6 +2389,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.ResultController",
+    "Method": "GetAll",
+    "RelativePath": "api/staff/Result/GetAll",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {

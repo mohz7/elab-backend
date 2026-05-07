@@ -16,5 +16,6 @@ namespace eLab.DAL.Repository.Interface
         Task<bool> ResultExistsForBookingItemAsync(int bookingItemId);
         Task<int> AddAsync(Result result);
         Task<int> UpdateAsync(Result result);
+        Task<List<Result>> GetAll();
     }
 }

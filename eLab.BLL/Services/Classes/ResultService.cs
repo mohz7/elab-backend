@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Midicare_eLab.DAL.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace eLab.BLL.Services.Classes
 {
@@ -26,6 +27,7 @@ namespace eLab.BLL.Services.Classes
         private readonly INotificationRepository _notificationRepository;
         private readonly IStaffProfileRepository _staffProfileRepository;
         private readonly UserManager<User> _userManager;
+        private readonly IBranchRepository _branchRepository;
 
         public ResultService(IResultRepository resultRepository,
             IBookingItemRepository bookingItemRepository,
@@ -34,7 +36,8 @@ namespace eLab.BLL.Services.Classes
             IPatientRecordRepository patientRecordRepository,
             INotificationRepository notificationRepository,
             IStaffProfileRepository staffProfileRepository,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            IBranchRepository branchRepository)
         {
             _resultRepository = resultRepository;
             _bookingItemRepository = bookingItemRepository;
@@ -44,6 +47,7 @@ namespace eLab.BLL.Services.Classes
             _notificationRepository = notificationRepository;
             _staffProfileRepository = staffProfileRepository;
             _userManager = userManager;
+            _branchRepository = branchRepository;
         }
 
         // ── Upload ────────────────────────────────────────────────
@@ -89,10 +93,9 @@ namespace eLab.BLL.Services.Classes
                 ResultId = result.Id,
                 BranchId = bookingItem.Booking.BranchId,
                 BookingId = bookingItem.BookingId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             });
 
-            // ✅ اجلبه من DB مع كل الـ Includes
             var savedResult = await _resultRepository.GetByIdAsync(result.Id);
 
             var response = await BuildResponseDto(savedResult!, ranges);
@@ -110,42 +113,52 @@ namespace eLab.BLL.Services.Classes
             if (result.Status != ResultStatus.Pending)
                 return ServiceResult<ResultResponse>.Fail(400, "Only pending results can be reviewed.", "...");
 
-            if (result.UploadedById == staffUserId)
+            if (result.UploadedById != staffUserId)
                 return ServiceResult<ResultResponse>.Fail(403, "You cannot approve your own uploaded result.", "...");
 
-            if (dto.Action == "approve")
-            {
-                result.Status = ResultStatus.Approved;
-                result.ApprovedById = staffUserId;
-                result.ReviewedAt = DateTime.UtcNow;
+            if (result.PatientProfile == null)
+                return ServiceResult<ResultResponse>.Fail(400, "Patient profile not found.", "...");
 
-                await _notificationRepository.CreateAsync(new Notification
+            if (dto.Action != ResultStatus.Approved && dto.Action != ResultStatus.Rejected)
+                return ServiceResult<ResultResponse>.Fail(400, "Invalid action. Must be Approved or Rejected.", "...");
+
+            try
+            {
+                if (dto.Action == ResultStatus.Approved)
                 {
-                    UserId = result.PatientProfile!.UserId,
-                    ResultId = result.Id,
-                    Type = NotificationType.ResultReady,
-                    Message = "Your lab result is ready. You can now view it.",
-                    IsRead = false,
-                    CreatedAt = DateTime.UtcNow
-                });
+                    result.Status = ResultStatus.Approved;
+                    result.ApprovedById = staffUserId;
+                    result.ReviewedAt = DateTime.UtcNow;
+
+                    await _notificationRepository.CreateAsync(new Notification
+                    {
+                        UserId = result.PatientProfile.UserId,
+                        ResultId = result.Id,
+                        Type = NotificationType.ResultReady,
+                        Message = "Your lab result is ready. You can now view it.",
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
+                else
+                {
+                    result.Status = ResultStatus.Rejected;
+                    result.ReviewedAt = DateTime.UtcNow;
+                }
+
+                await _resultRepository.UpdateAsync(result);
             }
-            else
+            catch (Exception ex)
             {
-                result.Status = ResultStatus.Rejected;
-                result.ReviewedAt = DateTime.UtcNow;
+                return ServiceResult<ResultResponse>.Fail(500, "An error occurred.", ex.Message);
             }
 
-            await _resultRepository.UpdateAsync(result);
+            var ranges = await _referenceRangeRepository.GetByTemplateIdAsync(
+                result.ReportTemplateId!.Value,
+                result.PatientProfile.User.Age,
+                result.PatientProfile.User.Gender);
 
-            // ✅ اجلبه من DB بعد الـ Update عشان يحمل ApprovedBy
-            var updatedResult = await _resultRepository.GetByIdAsync(resultId);
-
-            var ranges = await _referenceRangeRepository
-                .GetByTemplateIdAsync(updatedResult!.ReportTemplateId!.Value,
-                    updatedResult.PatientProfile!.User.Age,
-                    updatedResult.PatientProfile.User.Gender);
-
-            var response = await BuildResponseDto(updatedResult, ranges);
+            var response = await BuildResponseDto(result, ranges);
             return ServiceResult<ResultResponse>.Ok(response);
         }
 
@@ -187,7 +200,10 @@ namespace eLab.BLL.Services.Classes
         public async Task<ServiceResult<List<ResultSummaryResponse>>> GetMyResultsAsync(
             string patientProfileId)
         {
-            var results = await _resultRepository.GetByPatientIdAsync(patientProfileId);
+            var user = await _userManager.FindByIdAsync(patientProfileId);
+            var results = await _resultRepository.GetByPatientIdAsync(user.IdentityNumber);
+            if (results is null)
+                return ServiceResult<List<ResultSummaryResponse>>.Fail(404, "patient not found", "...");
 
             var response = results.Select(r =>
             {
@@ -200,7 +216,8 @@ namespace eLab.BLL.Services.Classes
                     ResultDate = r.ResultDate,
                     Status = r.Status,
                     AbnormalCount = abnormalCount,
-                    HasAbnormalValues = abnormalCount > 0
+                    HasAbnormalValues = abnormalCount > 0,
+                    UploadedAt = r.UploadedAt
                 };
             }).ToList();
 
@@ -225,10 +242,108 @@ namespace eLab.BLL.Services.Classes
                 ResultDate = r.ResultDate,
                 Status = r.Status,
                 AbnormalCount = 0,
-                HasAbnormalValues = false
+                HasAbnormalValues = false,
+                UploadedAt = r.UploadedAt
             }).ToList();
 
             return ServiceResult<List<ResultSummaryResponse>>.Ok(response);
+        }
+
+        // ── Get Pending Approval (Admin) ──────────────────────────
+        public async Task<ServiceResult<List<ResultSummaryResponse>>> GetPendingApprovalInAdminAsync(int? branchId)
+        {
+            if (branchId.HasValue)
+            {
+                var branch = await _branchRepository.GetByIdAsync(branchId.Value); // ✅
+                if (branch == null)
+                    return ServiceResult<List<ResultSummaryResponse>>.Fail(404, "Branch not found.", "...");
+            }
+
+            var results = await _resultRepository.GetPendingApprovalAsync(branchId.Value);
+
+            var response = results.Select(r => new ResultSummaryResponse
+            {
+                Id = r.Id,
+                TestName = r.BookingItem?.TestCatalog?.Name ?? "",
+                ResultDate = r.ResultDate,
+                Status = r.Status,
+                AbnormalCount = r.ResultFlags == ResultFlags.Normal ? 0 : 1, // ✅
+                HasAbnormalValues = r.ResultFlags != ResultFlags.Normal,       // ✅
+                UploadedAt = r.UploadedAt
+            }).ToList();
+
+            return ServiceResult<List<ResultSummaryResponse>>.Ok(response);
+        }
+
+        // ── Get All (Admin) ──────────────────────────
+        public async Task<ServiceResult<List<ResultResponse>>> GetAll(string? userId, int? branchId)
+        {
+            var results = await _resultRepository.GetAll();
+            if (!results.Any())
+                return ServiceResult<List<ResultResponse>>.Fail(404, "Result not found", "...");
+
+            // ✅ فلتر بالـ userId
+            if (!string.IsNullOrWhiteSpace(userId))
+            {
+                var user = await _userManager.Users
+                    .FirstOrDefaultAsync(u => u.IdentityNumber == userId);
+                if (user == null)
+                    return ServiceResult<List<ResultResponse>>.Fail(404, "Staff not found.", "...");
+                results = results.Where(re => re.UploadedById == user.Id).ToList();
+            }
+
+            // ✅ فلتر بالـ branchId
+            if (branchId.HasValue)
+            {
+                var branch = await _branchRepository.GetByIdAsync(branchId.Value);
+                if (branch == null)
+                    return ServiceResult<List<ResultResponse>>.Fail(404, "Branch not found.", "...");
+                results = results.Where(re => re.BookingItem.Booking.BranchId == branchId.Value).ToList();
+            }
+
+            if (!results.Any())
+                return ServiceResult<List<ResultResponse>>.Fail(404, "No results found for the given filters.", "...");
+
+            var responseList = new List<ResultResponse>();
+            foreach (var result in results)
+            {
+                var ranges = await _referenceRangeRepository.GetByTemplateIdAsync(
+                    result.ReportTemplateId!.Value,
+                    result.PatientProfile!.User.Age,
+                    result.PatientProfile.User.Gender);
+                responseList.Add(await BuildResponseDto(result, ranges));
+            }
+
+            return ServiceResult<List<ResultResponse>>.Ok(responseList);
+        }
+
+        // ── Get All (Staff) ──────────────────────────
+        public async Task<ServiceResult<List<ResultResponse>>> GetAll(string userId)
+        {
+            var results = await _resultRepository.GetAll();
+            if (!results.Any())
+                return ServiceResult<List<ResultResponse>>.Fail(404, "Result not found", "...");
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return ServiceResult<List<ResultResponse>>.Fail(404, "Staff not found.", "...");
+
+            results = results.Where(re => re.UploadedById == user.Id).ToList();
+
+            var responseList = new List<ResultResponse>();
+
+            foreach (var result in results)
+            {
+                var ranges = await _referenceRangeRepository.GetByTemplateIdAsync(
+                    result.ReportTemplateId!.Value,
+                    result.PatientProfile!.User.Age,
+                    result.PatientProfile.User.Gender);
+
+                responseList.Add(await BuildResponseDto(result, ranges));
+            }
+
+            return ServiceResult<List<ResultResponse>>.Ok(responseList);
         }
 
         // ── Flag Evaluation ───────────────────────────────────────
@@ -258,18 +373,6 @@ namespace eLab.BLL.Services.Classes
             if (hasHigh) return ResultFlags.High;
             if (hasLow) return ResultFlags.Low;
             return ResultFlags.Normal;
-        }
-
-        // ── Deserialize Flags ─────────────────────────────────────
-        private Dictionary<string, ResultFlags> DeserializeFlags(string? json)
-        {
-            if (string.IsNullOrEmpty(json))
-                return new Dictionary<string, ResultFlags>();
-
-            var raw = JsonSerializer.Deserialize<Dictionary<string, string>>(json)
-                      ?? new Dictionary<string, string>();
-
-            return raw.ToDictionary(kvp => kvp.Key, kvp => Enum.Parse<ResultFlags>(kvp.Value));
         }
 
         // ── Build Response DTO ────────────────────────────────────
@@ -324,6 +427,7 @@ namespace eLab.BLL.Services.Classes
                 Parameters = parameters,
                 TotalParameters = parameters.Count,
                 AbnormalCount = abnormalCount,
+                PatientName = result.PatientProfile.User.FullName
             };
         }
     }

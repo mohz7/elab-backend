@@ -29,6 +29,13 @@ namespace eLab.PL.Areas.Staff.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _resultService.GetAll(UserId);
+            return StatusCode(result.StatusCode, result);
+        }
+
         // Anyone sees a single result (access checked in service)
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)

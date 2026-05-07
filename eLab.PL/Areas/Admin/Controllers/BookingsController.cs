@@ -1,4 +1,5 @@
 ﻿using eLab.BLL.Services.Interface;
+using eLab.DAL.Dto.Requests;
 using eLab.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -56,9 +57,11 @@ namespace eLab.PL.Areas.Admin.Controllers
         }
 
         [HttpPatch("change-status/{bookingId}")]
-        public async Task<IActionResult> ChangeOrderStatus(int bookingId, [FromBody] Status newStatus)
+        public async Task<IActionResult> ChangeOrderStatus(int bookingId, [FromBody] Change_statusRequest newStatus)
         {
             var result = await _bookingService.ChangeStatusAsync(bookingId, newStatus);
+            if (!result.Success)
+                return BadRequest(new { message = "Failed to change status" });
             return Ok(new { message = "status is changed" });
         }
     }

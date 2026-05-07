@@ -16,6 +16,9 @@ using eLab.PL.Extensions;
 using eLab.BLL.MapsterConfigurations.MapsterBookingItem;
 using System.Text.Json.Serialization;
 using Stripe;
+using System;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace eLab.PL
 {
@@ -91,7 +94,25 @@ namespace eLab.PL
                 });
             });
 
+            builder.Services.AddDataProtection()
+                .PersistKeysToDbContext<ApplicationDbContext>()
+                .SetApplicationName("eLab");
+
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.DefaultIgnoreCondition =
+                        System.Text.Json.Serialization.JsonIgnoreCondition.Never;
+                });
+
             var app = builder.Build();
+
+            app.Use(async (context, next) =>
+            {
+                var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Arab Standard Time");
+                TimeZoneInfo.ClearCachedData();
+                await next();
+            });
 
             app.MapOpenApi();
             app.MapScalarApiReference(options =>
@@ -103,11 +124,11 @@ namespace eLab.PL
             var objectOfSeedData = scope.ServiceProvider.GetRequiredService<ISeedData>();
             await objectOfSeedData.IdentityDataSeedingAsync();
 
-            app.UseCors("AllowFrontend");   
-            app.UseHttpsRedirection();      
-            app.UseAuthentication();        
-            app.UseAuthorization();         
-            app.MapControllers();           
+            app.UseCors("AllowFrontend");
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.MapControllers();
 
             app.Run();
         }

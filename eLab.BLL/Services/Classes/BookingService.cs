@@ -40,8 +40,12 @@ namespace eLab.BLL.Services.Classes
             return ServiceResult<Booking>.Ok(result);
         }
 
-        public async Task<ServiceResult<bool>> ChangeStatusAsync(int bookingId, Status newStatus)
+        public async Task<ServiceResult<bool>> ChangeStatusAsync(int bookingId, Change_statusRequest newStatus)
         {
+            var booking = await _bookingRepository.GetByIdAsync(bookingId);
+            if (booking is null)
+                return ServiceResult<bool>.Fail(404, "booking not found", "...");
+
             var result = await _bookingRepository.ChangeStatusAsync(bookingId, newStatus);
             return ServiceResult<bool>.Ok(result);
         }

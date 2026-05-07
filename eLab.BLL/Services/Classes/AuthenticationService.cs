@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using eLab.BLL.Services.Common;
 using eLab.DAL.Repository.Interface;
+using Microsoft.AspNetCore.WebUtilities;
 
 
 namespace eLab.BLL.Services.Classes
@@ -35,7 +36,7 @@ namespace eLab.BLL.Services.Classes
 
         public AuthenticationService(UserManager<User> userManager,
             IConfiguration configuration,
-            IEmailSender  emailSender,
+            IEmailSender emailSender,
             SignInManager<User> signInManager,
             IPatientProfileRepository patientProfileRepository)
         {
@@ -79,22 +80,26 @@ namespace eLab.BLL.Services.Classes
                 Token = await CreateTokenAsync(user)
             };
         }
+
         public async Task<string> ConfirmEmail(string token, string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if(user is null)
-            {
-                throw new Exception("user not found");
-            }
-            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (user == null)
+                throw new Exception("User not found");
+
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
             if (result.Succeeded)
-            {
-                return "Email confirmed succesfully";
-            }
-            return "Email confirmed failed";
+                return "Email confirmed successfully";
+
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            return $"Email confirmation failed: {errors}";
         }
 
-        public async Task<ServiceResult<string>> RegisterAsync(RegisterRequest registerRequest,HttpRequest Request)
+        public async Task<ServiceResult<string>> RegisterAsync(RegisterRequest registerRequest, HttpRequest Request)
         {
             var user = new User()
             {
@@ -105,43 +110,53 @@ namespace eLab.BLL.Services.Classes
                 IdentityNumber = registerRequest.IdentityNumber,
                 Gender = registerRequest.Gender,
                 DateOfBirth = registerRequest.DateOfBirth,
-                
             };
 
             var result = await _userManager.CreateAsync(user, registerRequest.Password);
-            if (result.Succeeded)
-            {
-                var patient = new PatientProfile()
-                {
-                    Id = user.IdentityNumber,
-                    UserId = user.Id,
-                    BloodType = registerRequest.BloodType,
-                    ChronicDiseases = registerRequest.ChronicDiseases,
-                    Allergies = registerRequest.Allergies,
-                    EmergencyContactName = registerRequest.EmergencyContactName,
-                    EmergencyContactPhone = registerRequest.EmergencyContactPhone,
-                    InsuranceCompany = registerRequest.InsuranceCompany,
-                    InsuranceNumber = registerRequest.InsuranceNumber,
-                    Notes = registerRequest.Notes,
-                };
-                var resultPatient = await _patientProfileRepository.CreateAsync(patient);
-                if(resultPatient != 1)
-                    throw new Exception($"Failed patient create");
 
-                await _userManager.AddToRoleAsync(user, "Patient");
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var escapeToken = Uri.EscapeDataString(token);
-                var emailUrl = $"{Request.Scheme}://{Request.Host}/api/Identity/Account/ConfirmEmail?token={escapeToken}&userId={user.Id}";
+            if (!result.Succeeded)
+                throw new Exception(string.Join(",", result.Errors.Select(e => e.Description)));
 
-                await _emailSender.SendEmailAsync(user.Email, "Welcome", $"<h1> Hello {user.FullName} </h1>" +
-                    $"<a href='{emailUrl}'>confirm</a>"
-                    );
-                return ServiceResult<string>.Ok("Please confirm your email");
-            }
-            else
+            // إنشاء الـ PatientProfile
+            var patient = new PatientProfile()
             {
-                throw new Exception($"{result.Errors}");
-            }
+                Id = user.IdentityNumber,
+                UserId = user.Id,
+                BloodType = registerRequest.BloodType,
+                ChronicDiseases = registerRequest.ChronicDiseases,
+                Allergies = registerRequest.Allergies,
+                EmergencyContactName = registerRequest.EmergencyContactName,
+                EmergencyContactPhone = registerRequest.EmergencyContactPhone,
+                InsuranceCompany = registerRequest.InsuranceCompany,
+                InsuranceNumber = registerRequest.InsuranceNumber,
+                Notes = registerRequest.Notes,
+            };
+
+            var resultPatient = await _patientProfileRepository.CreateAsync(patient);
+            if (resultPatient != 1)
+                throw new Exception("Failed patient create");
+
+            await _userManager.AddToRoleAsync(user, "Patient");
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var baseUrl = _configuration["AppSettings:BaseUrl"];
+            var confirmUrl = $"{baseUrl}/api/Identity/Account/ConfirmEmail?token={encodedToken}&userId={user.Id}";
+
+            await _emailSender.SendEmailAsync(
+                user.Email,
+                "Confirm your email",
+                $@"
+                <h2>Welcome {user.FullName}</h2>
+                <p>Please confirm your email:</p>
+                <a href=""{confirmUrl}"">Confirm Email</a>
+                <br/><br/>
+                <p>If the button doesn't work, copy this link:</p>
+                <p>{confirmUrl}</p>
+                "
+            );
+
+            return ServiceResult<string>.Ok("Please confirm your email");
         }
 
         private async Task<string> CreateTokenAsync(User user)
@@ -152,8 +167,9 @@ namespace eLab.BLL.Services.Classes
                 new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
             };
+
             var Roles = await _userManager.GetRolesAsync(user);
-            foreach(var role in Roles)
+            foreach (var role in Roles)
             {
                 Claims.Add(new Claim(ClaimTypes.Role, role));
             }
@@ -165,10 +181,11 @@ namespace eLab.BLL.Services.Classes
                 claims: Claims,
                 expires: DateTime.Now.AddDays(10),
                 signingCredentials: credentials
-                );
+            );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
         public async Task<bool> ForgotPasswordAsync(ForgotPassword request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
@@ -185,17 +202,19 @@ namespace eLab.BLL.Services.Classes
             await _emailSender.SendEmailAsync(request.Email, "Reset Password", $"<p>code is {code}</p>");
             return true;
         }
+
         public async Task<bool> ResetPasswordAsync(ResetPasswordRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user is null) throw new Exception("user not found");
             if (user.CodeResetPassword != request.code) return false;
             if (user.PasswordResetCodeExpiry < DateTime.UtcNow) return false;
+
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var result = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
             if (result.Succeeded)
             {
-                await _emailSender.SendEmailAsync(request.Email, "change password", "<h1>your password is changed</h1>");
+                await _emailSender.SendEmailAsync(request.Email, "Change Password", "<h1>Your password has been changed</h1>");
             }
             return true;
         }

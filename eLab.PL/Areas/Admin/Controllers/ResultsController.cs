@@ -39,9 +39,15 @@ namespace eLab.PL.Areas.Admin.Controllers
 
         // Staff sees results waiting for their approval
         [HttpGet("pending")]
-        public async Task<IActionResult> GetPending()
+        public async Task<IActionResult> GetPending([FromQuery] int? branchId)
         {
-            var result = await _resultService.GetPendingApprovalAsync(UserId);
+            var result = await _resultService.GetPendingApprovalInAdminAsync(branchId);
+            return StatusCode(result.StatusCode, result);
+        }
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll([FromQuery] string? userId, [FromQuery] int? branchId)
+        {
+            var result = await _resultService.GetAll(userId, branchId);
             return StatusCode(result.StatusCode, result);
         }
 

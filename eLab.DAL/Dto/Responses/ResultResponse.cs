@@ -16,6 +16,7 @@ namespace eLab.DAL.Dto.Responses
         public DateTime UploadedAt { get; set; }
         public DateTime? ReviewedAt { get; set; }
         public ResultStatus Status { get; set; }
+        public string PatientName { get; set; }
         public string? FileUrl { get; set; }
         public string UploadedByName { get; set; }
         public string? ApprovedByName { get; set; }

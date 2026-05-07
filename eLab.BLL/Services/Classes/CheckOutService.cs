@@ -17,6 +17,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+
 
 namespace eLab.BLL.Services.Classes
 {
@@ -33,6 +35,7 @@ namespace eLab.BLL.Services.Classes
         private readonly IEmailSender _emailSender;
         private readonly IBookingItemRepository _bookingItemRepository;
         private readonly IStaffProfileRepository _staffProfileRepository;
+        private readonly IConfiguration _configuration;
 
         public CheckOutService(ICartRepository cartRepository,
             UserManager<User> userManager,
@@ -44,7 +47,8 @@ namespace eLab.BLL.Services.Classes
             IBookingRepository bookingRepository,
             IEmailSender emailSender,
             IBookingItemRepository bookingItemRepository,
-            IStaffProfileRepository staffProfileRepository)
+            IStaffProfileRepository staffProfileRepository,
+            IConfiguration configuration)
         {
             _cartRepository = cartRepository;
             _userManager = userManager;
@@ -57,18 +61,23 @@ namespace eLab.BLL.Services.Classes
             _emailSender = emailSender;
             _bookingItemRepository = bookingItemRepository;
             _staffProfileRepository = staffProfileRepository;
+            _configuration = configuration;
         }
 
         public async Task<ServiceResult<bool>> HandlePaymentSuccessAsync(int bookingId)
         {
+
             var booking = await _bookingRepository.GetByIdAsync(bookingId);
+            if (booking.Status == Status.Confirmed)
+            {
+                return ServiceResult<bool>.Ok(true);
+            }
             var userId = booking.PatientProfile.User.Id;
             var today = DateTime.Today;
             var prices = await _priceRepository.GetAllAsync();
             var offers = await _offerRepository.GetAllAsync();
             var carts = await _cartRepository.GetUserCartAsync(userId);
 
-            // ✅ خزن BookingItems للـ Visa والـ Cash
             var bookingItems = new List<BookingItem>();
             foreach (var cartItem in carts)
             {
@@ -112,6 +121,8 @@ namespace eLab.BLL.Services.Classes
             if (booking.PaymentMethod == PaymentMethodEnum.Visa)
             {
                 booking.Status = Status.Confirmed;
+                booking.PaymentStatus = PaymentStatus.Paid;
+                await _bookingRepository.UpdateAsync(booking);
                 subject = "Payment successful - eLab";
                 body = $"<h1>Thank you for your payment</h1>" +
                        $"<p>Booking ID: {bookingId}</p>" +
@@ -255,13 +266,15 @@ namespace eLab.BLL.Services.Classes
 
             if (request.PaymentMethod == PaymentMethodEnum.Visa)
             {
+                var baseUrl = _configuration["AppSettings:BaseUrl"];
+
                 var options = new SessionCreateOptions
                 {
                     PaymentMethodTypes = new List<string> { "card" },
                     LineItems = new List<SessionLineItemOptions>(),
                     Mode = "payment",
-                    SuccessUrl = $"{Request.Scheme}://{Request.Host}/api/Customer/CheckOuts/success/{booking.Id}",
-                    CancelUrl = $"{Request.Scheme}://{Request.Host}/checkout/cancel",
+                    SuccessUrl = $"{baseUrl}/api/patient/CheckOuts/success/{booking.Id}", 
+                    CancelUrl = $"{baseUrl}/checkout/cancel",
                 };
 
                 foreach (var item in cartItems)
@@ -278,13 +291,13 @@ namespace eLab.BLL.Services.Classes
                         ? itemPrice.BasePrice * (itemOffer.DiscountPercent / 100m)
                         : 0;
 
-                    long finalUnitAmount = (long)Math.Max(0, itemPrice.BasePrice - itemDiscount);
+                    long finalUnitAmount = (long)(Math.Max(0, itemPrice.BasePrice - itemDiscount) * 100); 
 
-                    options.LineItems.Add(new SessionLineItemOptions
+                    options.LineItems.Add(new SessionLineItemOptions 
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            Currency = "USD",
+                            Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
                                 Name = item.TestCatalog.Name,
@@ -318,7 +331,6 @@ namespace eLab.BLL.Services.Classes
             };
             return ServiceResult<CheckOutResponse>.Ok(result);
         }
-
         public async Task<ServiceResult<CheckOutResponse>> ProcessPaymentByStaffAsync(string patientId, CheckOutRequest request, string userId, HttpRequest Request)
         {
             var result = new CheckOutResponse();

@@ -20,6 +20,6 @@ namespace eLab.BLL.Services.Interface
         Task<ServiceResult<Booking>> AddAsync(Booking booking);
         Task<ServiceResult<List<BookingResponse>>> GetBookingByPatientAsync(string patientId);
         Task<ServiceResult<List<Booking>>> GetByStatusAsync(Status status);
-        Task<ServiceResult<bool>> ChangeStatusAsync(int orderId, Status newStatus);
+        Task<ServiceResult<bool>> ChangeStatusAsync(int orderId, Change_statusRequest newStatus);
     }
 }

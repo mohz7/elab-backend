@@ -34,7 +34,7 @@ namespace eLab.PL.Areas.Patient.Controllers
         public async Task<IActionResult> GetMyResults()
         {
             // get patientProfileId from claims or look it up
-            var patientProfileId = User.FindFirstValue("PatientProfileId")!;
+            var patientProfileId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var result = await _resultService.GetMyResultsAsync(patientProfileId);
             return StatusCode(result.StatusCode, result);
         }

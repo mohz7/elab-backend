@@ -13,7 +13,7 @@ namespace eLab.BLL.Services.Interface
     {
         Task<ServiceResult<List<PatientRecordResponse>>> GetAllAsync();
         Task<ServiceResult<PatientRecordResponse>> GetByIdAsync(int id);
-        Task<ServiceResult<List<PatientRecordResponse>>> GetByPatientProfileIdAsync(string patientProfileId);
+        Task<ServiceResult<PatientRecordResponse>> GetByPatientProfileIdAsync(string patientProfileId);
         Task<ServiceResult<string>> CreateAsync(PatientRecordRequest request);
         Task<ServiceResult<string>> RemoveAsync(int id);
         Task<ServiceResult<string>> UpdateAsync(int id, PatientRecordRequest request);

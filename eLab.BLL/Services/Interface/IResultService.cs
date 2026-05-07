@@ -22,8 +22,12 @@ namespace eLab.BLL.Services.Interface
 
         Task<ServiceResult<List<ResultSummaryResponse>>> GetPendingApprovalAsync(
             string staffUserId);
+        Task<ServiceResult<List<ResultSummaryResponse>>> GetPendingApprovalInAdminAsync(
+            int? branchId);
 
         Task<ServiceResult<ResultResponse>> ReviewResultAsync(
             int resultId, ReviewResultRequest dto, string staffUserId);
+        Task<ServiceResult<List<ResultResponse>>> GetAll(string? userId, int? branchId);
+        Task<ServiceResult<List<ResultResponse>>> GetAll(string userId);
     }
 }

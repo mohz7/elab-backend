@@ -3,6 +3,7 @@ using eLab.DAL.DTO.Requests;
 using eLab.DAL.DTO.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 namespace eLab.PL.Areas.Identity.Controllers
 {
@@ -30,9 +31,9 @@ namespace eLab.PL.Areas.Identity.Controllers
             return Ok(result);
         }
         [HttpGet("ConfirmEmail")]
-        public async Task<ActionResult<string>> ConfirmEmail([FromQuery] string token,[FromQuery] string userId)
+        public async Task<ActionResult<string>> ConfirmEmail([FromQuery] string token, [FromQuery] string userId)
         {
-            var result = await _authenticationService.ConfirmEmail(token,userId);
+            var result = await _authenticationService.ConfirmEmail(token, userId);
             return Ok(result);
         }
         [HttpPost("forgot-password")]

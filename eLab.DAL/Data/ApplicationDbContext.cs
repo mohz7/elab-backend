@@ -1,4 +1,5 @@
 ﻿using eLab.DAL.Models;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +14,9 @@ using System.Threading.Tasks;
 
 namespace Midicare_eLab.DAL.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User>
+    public class ApplicationDbContext : IdentityDbContext<User> , IDataProtectionKeyContext
     {
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
         public DbSet<Branch> Branches { get; set; }
         public DbSet<StaffProfile> StaffProfiles { get; set; }
         public DbSet<PatientProfile> PatientProfiles { get; set; }

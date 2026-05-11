@@ -928,6 +928,22 @@
   },
   {
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.StaffProfilesController",
+    "Method": "Active",
+    "RelativePath": "api/admin/StaffProfiles/Active/{id}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Admin.Controllers.StaffProfilesController",
     "Method": "ChangePassword",
     "RelativePath": "api/admin/StaffProfiles/ChangePassword/{id}",
     "HttpMethod": "PATCH",
@@ -1007,9 +1023,9 @@
   },
   {
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.StaffProfilesController",
-    "Method": "Remove",
+    "Method": "InActive",
     "RelativePath": "api/admin/StaffProfiles/InActive/{id}",
-    "HttpMethod": "DELETE",
+    "HttpMethod": "PATCH",
     "IsController": true,
     "Order": 0,
     "Parameters": [

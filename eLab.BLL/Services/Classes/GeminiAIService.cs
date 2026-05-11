@@ -1,8 +1,8 @@
 ﻿using eLab.BLL.Services.Interface;
 using eLab.DAL.Models;
+using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
 
 namespace eLab.BLL.Services.Classes
 {
@@ -24,7 +24,7 @@ namespace eLab.BLL.Services.Classes
             _apiKey = config["Gemini:ApiKey"]
                 ?? throw new InvalidOperationException("Gemini API key is not configured.");
 
-            _model = config["Gemini:Model"] ?? "gemini-1.5-flash";
+            _model = config["Gemini:Model"] ?? "gemini-2.5-flash";
         }
 
         public async Task<string> GetConversationResponseAsync(
@@ -34,13 +34,37 @@ namespace eLab.BLL.Services.Classes
         {
             var contents = new List<object>();
 
-            // context
+            // Detect language from patient message
+            bool isArabic = IsArabic(newMessage);
+
+            var languageInstruction = isArabic
+                ? "IMPORTANT: Always reply in Arabic language only."
+                : "IMPORTANT: Always reply in English language only.";
+
+            // System context
             contents.Add(new
             {
                 role = "user",
-                parts = new[] { new { text = contextSummary } }
+                parts = new[]
+                {
+                    new
+                    {
+                        text = $"""
+                        {contextSummary}
+
+                        {languageInstruction}
+
+                        Additional Rules:
+                        - Reply in the SAME language as the patient.
+                        - Keep answers short and simple.
+                        - Use friendly and easy-to-understand language.
+                        - Never give dangerous medical advice.
+                        """
+                    }
+                }
             });
 
+            // AI acknowledgment
             contents.Add(new
             {
                 role = "model",
@@ -48,26 +72,40 @@ namespace eLab.BLL.Services.Classes
                 {
                     new
                     {
-                        text = "Understood. I will help explain these lab results in simple language. Please ask your question."
+                        text = isArabic
+                            ? "فهمت، سأجيب باللغة العربية بشكل واضح وبسيط."
+                            : "Understood. I will reply in clear and simple English."
                     }
                 }
             });
 
-            // history
-            foreach (var msg in history)
+            // Conversation history
+            foreach (var msg in history.OrderBy(x => x.SentAt).TakeLast(10))
             {
                 contents.Add(new
                 {
                     role = msg.Role == ChatMessageRole.User ? "user" : "model",
-                    parts = new[] { new { text = msg.Message } }
+                    parts = new[]
+                    {
+                        new
+                        {
+                            text = msg.Message
+                        }
+                    }
                 });
             }
 
-            // new message
+            // New patient message
             contents.Add(new
             {
                 role = "user",
-                parts = new[] { new { text = newMessage } }
+                parts = new[]
+                {
+                    new
+                    {
+                        text = newMessage
+                    }
+                }
             });
 
             var requestBody = new
@@ -80,23 +118,45 @@ namespace eLab.BLL.Services.Classes
                 }
             };
 
-            var url = $"v1beta/models/{_model}:generateContent?key={_apiKey}";
+            var url =
+                $"v1beta/models/{_model}:generateContent?key={_apiKey}";
 
-            var response = await _httpClient.PostAsJsonAsync(url, requestBody);
+            HttpResponseMessage response = null!;
 
-            if (!response.IsSuccessStatusCode)
+            // Retry for 429 errors
+            for (int i = 0; i < 3; i++)
             {
+                response = await _httpClient.PostAsJsonAsync(url, requestBody);
+
+                if (response.IsSuccessStatusCode)
+                    break;
+
+                if ((int)response.StatusCode == 429)
+                {
+                    await Task.Delay(3000);
+                    continue;
+                }
+
                 var error = await response.Content.ReadAsStringAsync();
                 throw new Exception($"Gemini API Error ({response.StatusCode}): {error}");
             }
 
+            if (!response.IsSuccessStatusCode)
+            {
+                return isArabic
+                    ? "عذرًا، حدث خطأ أثناء التواصل مع الذكاء الاصطناعي."
+                    : "Sorry, an error occurred while contacting the AI service.";
+            }
+
             var json = await response.Content.ReadFromJsonAsync<JsonElement>();
 
-            // حماية من الكراش
+            // Protection from crashes
             if (!json.TryGetProperty("candidates", out var candidates) ||
                 candidates.GetArrayLength() == 0)
             {
-                return "No response from AI.";
+                return isArabic
+                    ? "لم يتم الحصول على رد من الذكاء الاصطناعي."
+                    : "No response from AI.";
             }
 
             var text = candidates[0]
@@ -105,7 +165,15 @@ namespace eLab.BLL.Services.Classes
                 .GetProperty("text")
                 .GetString();
 
-            return text ?? "Sorry, I could not generate a response. Please try again.";
+            return text ??
+                   (isArabic
+                       ? "عذرًا، لم أستطع إنشاء رد."
+                       : "Sorry, I could not generate a response.");
+        }
+
+        private bool IsArabic(string text)
+        {
+            return text.Any(c => c >= 0x0600 && c <= 0x06FF);
         }
     }
 }

@@ -2,11 +2,6 @@
 using eLab.DAL.Repository.Interface;
 using Microsoft.EntityFrameworkCore;
 using Midicare_eLab.DAL.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eLab.DAL.Repository.Classes
 {
@@ -18,8 +13,11 @@ namespace eLab.DAL.Repository.Classes
         public async Task<StaffChat?> GetByIdAsync(int chatId)
             => await _context.StaffChats
                 .Include(c => c.StaffChatMessages.OrderBy(m => m.SentAt))
+                    .ThenInclude(m => m.Sender)
                 .Include(c => c.PatientProfile)
+                    .ThenInclude(p => p.User)
                 .Include(c => c.StaffProfile)
+                    .ThenInclude(s => s.User)
                 .FirstOrDefaultAsync(c => c.Id == chatId);
 
         public async Task<StaffChat?> GetByBookingIdAsync(int bookingId)
@@ -31,6 +29,10 @@ namespace eLab.DAL.Repository.Classes
             => await _context.StaffChats
                 .Where(c => c.PatientProfileId == patientId)
                 .Include(c => c.StaffChatMessages)
+                .Include(c => c.PatientProfile)
+                    .ThenInclude(p => p.User)
+                .Include(c => c.StaffProfile)
+                    .ThenInclude(s => s.User)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
 
@@ -38,6 +40,10 @@ namespace eLab.DAL.Repository.Classes
             => await _context.StaffChats
                 .Where(c => c.StaffProfileId == staffId)
                 .Include(c => c.StaffChatMessages)
+                .Include(c => c.PatientProfile)
+                    .ThenInclude(p => p.User)
+                .Include(c => c.StaffProfile)
+                    .ThenInclude(s => s.User)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
 
@@ -48,8 +54,13 @@ namespace eLab.DAL.Repository.Classes
                 .OrderBy(m => m.SentAt)
                 .ToListAsync();
 
-        public async Task<bool> SessionExistsForBookingAsync(int bookingId)
-            => await _context.StaffChats.AnyAsync(c => c.BookingId == bookingId);
+        // ← جديد: تحقق من وجود session عبر ResultId
+        public async Task<bool> SessionExistsForResultAsync(int resultId)
+            => await _context.Results
+                .Where(r => r.Id == resultId)
+                .AnyAsync(r => r.BookingItem != null &&
+                               _context.StaffChats
+                                   .Any(c => c.BookingId == r.BookingItem.BookingId));
 
         public async Task<int> AddSessionAsync(StaffChat chat)
         {

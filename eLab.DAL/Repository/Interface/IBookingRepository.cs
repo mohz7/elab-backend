@@ -20,6 +20,7 @@ namespace eLab.DAL.Repository.Interface
         Task<List<Booking>> GetByStatusAsync(Status status);
         Task<bool> ChangeStatusAsync(int bookingId, Change_statusRequest newStatus);
         Task UpdateAsync(Booking booking);
+        Task<Booking?> GetByResultIdAsync(int resultId);
 
     }
 }

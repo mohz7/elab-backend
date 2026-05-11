@@ -16,7 +16,8 @@ namespace eLab.BLL.Services.Interface
         public Task<ServiceResult<string>> CreateAsync(StaffProfileRequest request, string adminId);
         public Task<ServiceResult<StaffProfilesResponse>> GetByIdAsync(string id);
         public Task<ServiceResult<string>> UpdateAsync(string id, UpdateStaffProfileRequest request);
-        public Task<ServiceResult<string>> RemoveAsync(string id);
+        public Task<ServiceResult<string>> InActiveAsync(string id);
+        public Task<ServiceResult<string>> ActiveAsync(string id);
         public Task<ServiceResult<string>> ChangePasswordAsync(string id, ChangePasswordRequest request);
 
     }

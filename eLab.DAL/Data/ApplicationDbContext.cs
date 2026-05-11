@@ -171,40 +171,35 @@ namespace Midicare_eLab.DAL.Data
             builder.Entity<Result>(e =>
             {
                 e.ToTable("Results");
-
-                // stores "Normal" / "High" / "Low" as string in DB
                 e.Property(r => r.ResultFlags)
                     .HasConversion<string>()
                     .HasMaxLength(20);
-
-                // stores "Pending" / "Approved" / "Rejected" as string in DB
                 e.Property(r => r.Status)
                     .HasConversion<string>()
                     .HasMaxLength(50);
-
                 e.HasOne(res => res.BookingItem)
                  .WithOne(bi => bi.Results)
                  .HasForeignKey<Result>(res => res.BookingItemId)
                  .OnDelete(DeleteBehavior.Restrict);
-
                 e.HasOne(res => res.PatientProfile)
                  .WithMany(pp => pp.Results)
                  .HasForeignKey(res => res.PatientProfileId)
                  .OnDelete(DeleteBehavior.Restrict);
-
                 e.HasOne(res => res.ReportTemplate)
                  .WithMany(rt => rt.Results)
                  .HasForeignKey(res => res.ReportTemplateId)
                  .OnDelete(DeleteBehavior.SetNull);
-
                 e.HasOne(res => res.UploadedBy)
                  .WithMany()
                  .HasForeignKey(res => res.UploadedById)
                  .OnDelete(DeleteBehavior.Restrict);
-
                 e.HasOne(res => res.ApprovedBy)
                  .WithMany()
                  .HasForeignKey(res => res.ApprovedById)
+                 .OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(res => res.StaffChat)
+                 .WithOne(c => c.Result)
+                 .HasForeignKey<StaffChat>(c => c.ResultId)
                  .OnDelete(DeleteBehavior.Restrict);
             });
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Midicare_eLab.DAL.Data;
 
@@ -11,9 +12,11 @@ using Midicare_eLab.DAL.Data;
 namespace eLab.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260511164652_AllowNullSenderIdForAIMessages")]
+    partial class AllowNullSenderIdForAIMessages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -812,9 +815,6 @@ namespace eLab.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("ResultId")
-                        .HasColumnType("int");
-
                     b.Property<string>("StaffProfileId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -824,9 +824,6 @@ namespace eLab.DAL.Migrations
                     b.HasIndex("BookingId");
 
                     b.HasIndex("PatientProfileId");
-
-                    b.HasIndex("ResultId")
-                        .IsUnique();
 
                     b.HasIndex("StaffProfileId");
 
@@ -1313,12 +1310,6 @@ namespace eLab.DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("eLab.DAL.Models.Result", "Result")
-                        .WithOne("StaffChat")
-                        .HasForeignKey("eLab.DAL.Models.StaffChat", "ResultId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("eLab.DAL.Models.StaffProfile", "StaffProfile")
                         .WithMany("StaffChats")
                         .HasForeignKey("StaffProfileId")
@@ -1328,8 +1319,6 @@ namespace eLab.DAL.Migrations
                     b.Navigation("Booking");
 
                     b.Navigation("PatientProfile");
-
-                    b.Navigation("Result");
 
                     b.Navigation("StaffProfile");
                 });
@@ -1497,8 +1486,6 @@ namespace eLab.DAL.Migrations
                     b.Navigation("Notifications");
 
                     b.Navigation("PatientRecords");
-
-                    b.Navigation("StaffChat");
                 });
 
             modelBuilder.Entity("eLab.DAL.Models.StaffChat", b =>

@@ -179,7 +179,7 @@ namespace eLab.BLL.Services.Classes
 
             var token = new JwtSecurityToken(
                 claims: Claims,
-                expires: DateTime.Now.AddDays(10),
+                expires: DateTime.Now.AddMinutes(60),
                 signingCredentials: credentials
             );
 

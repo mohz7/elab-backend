@@ -31,6 +31,7 @@ namespace eLab.BLL.Services.Classes
             _userManager = userManager;
         }
 
+
         public async Task<ServiceResult<string>> ChangePasswordAsync(string id, ChangePasswordRequest request)
         {
             StaffProfile? staff = null;
@@ -53,7 +54,6 @@ namespace eLab.BLL.Services.Classes
             if (user is null)
                 return ServiceResult<string>.Fail(404, "User not found", "...");
 
-            // ↓ هون كان الخطأ، staff.User → user
             var passwordCheck = await _userManager.CheckPasswordAsync(user, request.OldPassword);
             if (!passwordCheck)
                 return ServiceResult<string>.Fail(403, "Old password is incorrect", "...");
@@ -170,18 +170,80 @@ namespace eLab.BLL.Services.Classes
             return ServiceResult<StaffProfilesResponse>.Ok(result);
         }
 
-        public async Task<ServiceResult<string>> RemoveAsync(string id)
+        public async Task<ServiceResult<string>> InActiveAsync(string id)
         {
-            var staff = await _staffProfileRepository.GetByIdAsync(id);
+            StaffProfile? staff = null;
+            User? user = null;
+
+            if (id.Length != 9)
+            {
+                user = await _userManager.FindByIdAsync(id);
+                if (user is null)
+                    return ServiceResult<string>.Fail(404, "User not found", "...");
+                staff = await _staffProfileRepository.GetByIdAsync(user.IdentityNumber);
+            }
+            else
+            {
+                staff = await _staffProfileRepository.GetByIdAsync(id);
+                if (staff is null)
+                    return ServiceResult<string>.Fail(404, "Staff not found", "...");
+                user = await _userManager.FindByIdAsync(staff.UserId);
+            }
+
             if (staff is null)
                 return ServiceResult<string>.Fail(404, "Staff not found", "...");
 
-            staff.User.IsActive = false;
-            var result = await _staffProfileRepository.UpdateAsync(staff);
-            if (result < 1)
-                return ServiceResult<string>.Fail(500, "Failed to Remove staff", "...");
+            if (user is null)
+                return ServiceResult<string>.Fail(404, "User not found", "...");
 
-            return ServiceResult<string>.Ok("Remove successfully");
+            if (!user.IsActive)
+                return ServiceResult<string>.Fail(400, "Staff is already inactive", "...");
+
+            user.IsActive = false;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return ServiceResult<string>.Fail(400, result.Errors.FirstOrDefault()?.Description, "...");
+
+            return ServiceResult<string>.Ok("Staff deactivated successfully");
+        }
+
+        public async Task<ServiceResult<string>> ActiveAsync(string id)
+        {
+            StaffProfile? staff = null;
+            User? user = null;
+
+            if (id.Length != 9)
+            {
+                user = await _userManager.FindByIdAsync(id);
+                if (user is null)
+                    return ServiceResult<string>.Fail(404, "User not found", "...");
+                staff = await _staffProfileRepository.GetByIdAsync(user.IdentityNumber);
+            }
+            else
+            {
+                staff = await _staffProfileRepository.GetByIdAsync(id);
+                if (staff is null)
+                    return ServiceResult<string>.Fail(404, "Staff not found", "...");
+                user = await _userManager.FindByIdAsync(staff.UserId);
+            }
+
+            if (staff is null)
+                return ServiceResult<string>.Fail(404, "Staff not found", "...");
+
+            if (user is null)
+                return ServiceResult<string>.Fail(404, "User not found", "...");
+
+            if (user.IsActive)
+                return ServiceResult<string>.Fail(400, "Staff is already active", "...");
+
+            user.IsActive = true;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return ServiceResult<string>.Fail(400, result.Errors.FirstOrDefault()?.Description, "...");
+
+            return ServiceResult<string>.Ok("Staff activated successfully");
         }
 
         public async Task<ServiceResult<string>> UpdateAsync(string id, UpdateStaffProfileRequest request)

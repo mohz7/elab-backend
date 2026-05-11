@@ -27,7 +27,7 @@ namespace eLab.DAL.Models
             public AIChat AIChat { get; set; }
 
             // User
-            public string SenderId { get; set; }
+            public string? SenderId { get; set; }
             public User? Sender { get; set; }
 
     }

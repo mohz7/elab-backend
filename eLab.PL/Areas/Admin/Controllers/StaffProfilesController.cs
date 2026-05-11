@@ -47,12 +47,20 @@ namespace eLab.PL.Areas.Admin.Controllers
             var result = await _staffProfilesService.UpdateAsync(id, request);
             return StatusCode(result.StatusCode, result);
         }
-        [HttpDelete("InActive/{id}")]
-        public async Task<IActionResult> Remove([FromRoute] string id)
+        [HttpPatch("InActive/{id}")]
+        public async Task<IActionResult> InActive([FromRoute] string id)
         {
-            var result = await _staffProfilesService.RemoveAsync(id);
+            var result = await _staffProfilesService.InActiveAsync(id);
             return StatusCode(result.StatusCode, result);
         }
+
+        [HttpPatch("Active/{id}")]
+        public async Task<IActionResult> Active([FromRoute] string id)
+        {
+            var result = await _staffProfilesService.ActiveAsync(id);
+            return StatusCode(result.StatusCode, result);
+        }
+
         [HttpPatch("ChangePassword/{id}")]
         public async Task<IActionResult> ChangePassword([FromRoute] string id, [FromBody] ChangePasswordRequest request)
         {

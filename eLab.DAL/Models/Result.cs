@@ -64,5 +64,8 @@ namespace eLab.DAL.Models
 
             // Notification
             public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+            // Result
+            public StaffChat? StaffChat { get; set; }
     }
 }

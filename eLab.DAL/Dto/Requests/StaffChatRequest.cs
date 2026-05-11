@@ -8,6 +8,6 @@ namespace eLab.DAL.Dto.Requests
 {
     public class StaffChatRequest
     {
-        public int BookingId { get; set; }
+        public int ResultId { get; set; }  // ← تغيّر من BookingId
     }
 }

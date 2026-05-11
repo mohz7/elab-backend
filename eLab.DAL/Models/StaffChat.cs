@@ -25,6 +25,10 @@ namespace eLab.DAL.Models
             // StaffProfile
             public string StaffProfileId { get; set; }
             public StaffProfile StaffProfile { get; set; }
+           
+            // Result
+            public int ResultId { get; set; }
+            public Result Result { get; set; }
 
 
         // Reverse Navigation

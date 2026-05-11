@@ -1,9 +1,6 @@
 ﻿using eLab.BLL.Services.Interface;
 using eLab.DAL.Dto.Requests;
-using eLab.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -26,7 +23,7 @@ namespace eLab.PL.Areas.Patient.Controllers
         [HttpPost("sessions")]
         public async Task<IActionResult> CreateSession([FromBody] StaffChatRequest request)
         {
-            var result = await _chatService.CreateSessionAsync(request.BookingId, UserId);
+            var result = await _chatService.CreateSessionAsync(request.ResultId, UserId);
             return StatusCode(result.StatusCode, result);
         }
 

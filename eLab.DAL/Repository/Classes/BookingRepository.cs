@@ -84,5 +84,13 @@ namespace eLab.DAL.Repository.Classes
             _context.Bookings.Update(booking);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Booking?> GetByResultIdAsync(int resultId)
+        => await _context.Results
+            .Where(r => r.Id == resultId)
+            .Include(r => r.BookingItem)
+                .ThenInclude(bi => bi.Booking)
+            .Select(r => r.BookingItem.Booking)
+            .FirstOrDefaultAsync();
     }
 }

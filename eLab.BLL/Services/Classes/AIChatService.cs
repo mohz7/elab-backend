@@ -59,11 +59,12 @@ namespace eLab.BLL.Services.Classes
 
         public async Task<ServiceResult<AIChatSessionResponse>> GetSessionAsync(int aiChatId, string patientId)
         {
+            var user = await _userManager.FindByIdAsync(patientId);
             var session = await _aiChatRepository.GetByIdAsync(aiChatId);
             if (session is null)
                 return ServiceResult<AIChatSessionResponse>.Fail(404, "AI chat session not found.", "...");
 
-            if (session.PatientProfileId != patientId)
+            if (session.PatientProfileId != user.IdentityNumber)
                 return ServiceResult<AIChatSessionResponse>.Fail(403, "Access denied.", "...");
 
             return ServiceResult<AIChatSessionResponse>.Ok(MapSession(session));

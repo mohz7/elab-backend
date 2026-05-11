@@ -314,8 +314,8 @@ namespace eLab.BLL.Services.Classes
             patient.EmergencyContactName = request.EmergencyContactName ?? patient.EmergencyContactName;
             patient.Notes = request.Notes ?? patient.Notes;
 
-            if (request.BranchId.HasValue)
-                patient.BranchId = request.BranchId.Value;
+            //if (request.BranchId.HasValue)
+            //    patient.BranchId = request.BranchId.Value;
 
             var result = await _patientProfileRepository.UpdateAsync(patient);
             if (result < 1)

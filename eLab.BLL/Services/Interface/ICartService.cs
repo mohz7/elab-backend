@@ -14,5 +14,6 @@ namespace eLab.BLL.Services.Interface
         public Task<ServiceResult<string>> AddToCartAsync(CartRequest request, string UserId);
         public Task<ServiceResult<CartSummaryRespones>> CartSummaryResponesAsync(string UserId);
         public Task<ServiceResult<string>> ClearCartAsync(string userId);
+        public Task<ServiceResult<string>> RemoveOneItemAsync(string userId, int itemId);
     }
 }

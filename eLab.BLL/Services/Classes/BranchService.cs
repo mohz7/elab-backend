@@ -34,20 +34,6 @@ namespace eLab.BLL.Services.Classes
             return ServiceResult<string>.Ok("Created successfully");
         }
 
-        public async Task<ServiceResult<string>> RemoveAsync(int id)
-        {
-            var branch = await _branchRepository.GetByIdAsync(id);
-            if (branch is null) return ServiceResult<string>.Fail(404, "Branch not found", "...");
-            if(branch.Bookings.Any())
-                return ServiceResult<string>.Fail(409, "Branch has active bookings", "...");
-
-            var result = await _branchRepository.RemoveAsync(branch);
-            if (result != 1)
-                return ServiceResult<string>.Fail(400, "Delete failed", "...");
-
-            return ServiceResult<string>.Ok("Deleted successfully");
-        }
-
         public async Task<ServiceResult<List<BranchResponse>>> GetAllAsync()
         {
             var branchs = await _branchRepository.GettAllAsync();
@@ -83,6 +69,36 @@ namespace eLab.BLL.Services.Classes
                 return ServiceResult<string>.Fail(400, "Update failed", "...");
 
             return ServiceResult<string>.Ok("Update is successfully");
+        }
+
+        public async Task<ServiceResult<string>> DeactivateAsync(int id)
+        {
+            var branch = await _branchRepository.GetByIdAsync(id);
+            if (branch is null) return ServiceResult<string>.Fail(404, "Branch not found", "...");
+
+            if (!branch.IsActive)
+                return ServiceResult<string>.Fail(400, "Branch is already deactivated", "...");
+
+            branch.IsActive = false;
+            var result = await _branchRepository.UpdateAsync(branch);
+            if (result < 1)
+                return ServiceResult<string>.Fail(400, "The change to deactivate failed", "...");
+            return ServiceResult<string>.Ok("The change to deactivate successfully");
+        }
+
+        public async Task<ServiceResult<string>> ActivateAsync(int id)
+        {
+            var branch = await _branchRepository.GetByIdAsync(id);
+            if (branch is null) return ServiceResult<string>.Fail(404, "Branch not found", "...");
+
+            if (branch.IsActive)
+                return ServiceResult<string>.Fail(400, "Branch is already activated", "...");
+
+            branch.IsActive = true;
+            var result = await _branchRepository.UpdateAsync(branch);
+            if (result != 1)
+                return ServiceResult<string>.Fail(400, "The change to activate failed", "...");
+            return ServiceResult<string>.Ok("The change to activate successfully");
         }
     }
 }

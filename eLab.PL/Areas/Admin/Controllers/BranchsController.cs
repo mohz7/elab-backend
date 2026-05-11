@@ -46,10 +46,17 @@ namespace eLab.PL.Areas.Admin.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        [HttpDelete("Remove/{id}")]
-        public async Task<IActionResult> Remove([FromHeader] int id)
+        [HttpPatch("Deactivate/{id}")]
+        public async Task<IActionResult> Deactivate([FromRoute] int id)
         {
-            var result = await _branchService.RemoveAsync(id);
+            var result = await _branchService.DeactivateAsync(id);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPatch("Activate/{id}")]
+        public async Task<IActionResult> Activate([FromRoute] int id)
+        {
+            var result = await _branchService.ActivateAsync(id);
             return StatusCode(result.StatusCode, result);
         }
     }

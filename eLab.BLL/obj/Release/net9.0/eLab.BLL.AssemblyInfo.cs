@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("eLab.BLL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d0c40a440d75be1c2fd01c944739bfe74c77e243")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c45f38b3db84fbf5d9a5e80b69d8f054fa241793")]
 [assembly: System.Reflection.AssemblyProductAttribute("eLab.BLL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("eLab.BLL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -85,6 +85,13 @@ namespace eLab.BLL.Services.Classes
         public async Task<ServiceResult<PatientProfileResponse?>> GetUserByBookingAsync(int bookingId)
         {
             var patient = await _bookingRepository.GetPatientByBookingAsync(bookingId);
+
+            if (patient is null)
+                return ServiceResult<PatientProfileResponse?>.Fail(404, "Patient not found for this booking", "...");
+
+            if (patient.User is null)
+                return ServiceResult<PatientProfileResponse?>.Fail(404, "User data not found", "...");
+
             var result = new PatientProfileResponse()
             {
                 Id = patient.Id,
@@ -105,7 +112,7 @@ namespace eLab.BLL.Services.Classes
                 PhoneNumber = patient.User.PhoneNumber,
                 Notes = patient.Notes,
             };
-            return ServiceResult<PatientProfileResponse>.Ok(result);
+            return ServiceResult<PatientProfileResponse?>.Ok(result);
         }
 
         public async Task<ServiceResult<List<BookingResponse>>> GetAll(int? branchId)

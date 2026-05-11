@@ -17,5 +17,7 @@ namespace eLab.DAL.Dto.Responses
         public decimal ValueMax { get; set; }
         public string Units { get; set; }
         public string Notes { get; set; }
+        public int ReportTemplateId { get; set; }
+
     }
 }

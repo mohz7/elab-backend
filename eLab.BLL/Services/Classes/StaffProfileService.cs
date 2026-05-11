@@ -34,26 +34,35 @@ namespace eLab.BLL.Services.Classes
         public async Task<ServiceResult<string>> ChangePasswordAsync(string id, ChangePasswordRequest request)
         {
             StaffProfile? staff = null;
+            User user = null;
+
             if (id.Length != 9)
             {
-                var user = await _userManager.FindByIdAsync(id);
+                user = await _userManager.FindByIdAsync(id);
                 staff = await _staffProfileRepository.GetByIdAsync(user.IdentityNumber);
-
             }
             else
             {
                 staff = await _staffProfileRepository.GetByIdAsync(id);
+                user = await _userManager.FindByIdAsync(staff.UserId);
             }
+
             if (staff is null)
                 return ServiceResult<string>.Fail(404, "Staff not found", "...");
 
-            var passwordCheck = await _userManager.CheckPasswordAsync(staff.User, request.OldPassword);
+            if (user is null)
+                return ServiceResult<string>.Fail(404, "User not found", "...");
+
+            // ↓ هون كان الخطأ، staff.User → user
+            var passwordCheck = await _userManager.CheckPasswordAsync(user, request.OldPassword);
             if (!passwordCheck)
                 return ServiceResult<string>.Fail(403, "Old password is incorrect", "...");
 
-            var result = await _userManager.ChangePasswordAsync(staff.User, request.OldPassword, request.NewPassword);
-            
-            return ServiceResult<string>.Ok("Change passowrd successfully");
+            var result = await _userManager.ChangePasswordAsync(user, request.OldPassword, request.NewPassword);
+            if (!result.Succeeded)
+                return ServiceResult<string>.Fail(400, result.Errors.FirstOrDefault()?.Description, "...");
+
+            return ServiceResult<string>.Ok("Change password successfully");
         }
 
         public async Task<ServiceResult<string>> CreateAsync(StaffProfileRequest request, string adminId)
@@ -71,9 +80,11 @@ namespace eLab.BLL.Services.Classes
             };
 
             var resultUser = await _userManager.CreateAsync(user, request.Password);
-            await _userManager.AddToRoleAsync(user, "Staff");
             if (!resultUser.Succeeded)
-                return ServiceResult<string>.Fail(403, "Failed to create user", "...");
+                return ServiceResult<string>.Fail(403,
+                    string.Join(", ", resultUser.Errors.Select(e => e.Description)), "...");
+
+            await _userManager.AddToRoleAsync(user, "Staff");
 
             if (!Enum.TryParse<JobTitle>(request.JobTitle, out var jobTitle))
                 return ServiceResult<string>.Fail(400, "Invalid JobTitle value", "...");
@@ -87,9 +98,11 @@ namespace eLab.BLL.Services.Classes
                 CreatedById = adminId,
                 UserId = user.Id
             };
+
             var resultStaff = await _staffProfileRepository.CreateAsync(staff);
-            if(resultStaff < 1)
+            if (resultStaff < 1)
                 return ServiceResult<string>.Fail(403, "Failed to create staff", "...");
+
             return ServiceResult<string>.Ok("Created successfully");
         }
 

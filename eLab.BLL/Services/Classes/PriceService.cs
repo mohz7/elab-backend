@@ -63,11 +63,30 @@ namespace eLab.BLL.Services.Classes
             return ServiceResult<PriceResponse>.Ok(result);
         }
 
-        public async Task<ServiceResult<string>> UpdateAsync(int id, PriceRequest request)
+        public async Task<ServiceResult<string>> UpdateAsync(int id, PriceUpdateRequest request)
         {
             var price = await _priceRepository.GetByIdAsync(id);
             if (price is null) return ServiceResult<string>.Fail(404, "Price not found", "...");
-            request.Adapt(price);
+
+            // بدّل هاي السطر ↓
+            // request.Adapt(price);
+
+            // وحط هاد بدله ↓
+            if (request.BasePrice.HasValue)
+                price.BasePrice = request.BasePrice.Value;
+
+            if (request.Currency is not null)
+                price.Currency = request.Currency;
+
+            if (request.EffectiveFrom.HasValue)
+                price.EffectiveFrom = request.EffectiveFrom.Value;
+
+            if (request.EffectiveTo.HasValue)
+                price.EffectiveTo = request.EffectiveTo.Value;
+
+            if (request.TestCatalogId.HasValue)
+                price.TestCatalogId = request.TestCatalogId.Value;
+
             await _priceRepository.UpdateAsync(price);
             return ServiceResult<string>.Ok("Update is successfully");
         }

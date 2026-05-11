@@ -4,6 +4,8 @@ using eLab.DAL.Dto.Responses;
 using eLab.DAL.Models;
 using eLab.DAL.Repository.Interface;
 using Mapster;
+using Microsoft.AspNetCore.Identity;
+using Midicare_eLab.DAL.Models;
 using Stripe;
 using System.Text;
 
@@ -14,31 +16,35 @@ namespace eLab.BLL.Services.Classes
         private readonly IAIChatRepository _aiChatRepository;
         private readonly IResultRepository _resultRepository;
         private readonly IAIService _aiService;
+        private readonly UserManager<User> _userManager;
 
         public AIChatService(
             IAIChatRepository aiChatRepository,
             IResultRepository resultRepository,
-            IAIService aiService)
+            IAIService aiService,
+            UserManager<User> userManager)
         {
             _aiChatRepository = aiChatRepository;
             _resultRepository = resultRepository;
             _aiService = aiService;
+            _userManager = userManager;
         }
 
         public async Task<ServiceResult<AIChatSessionResponse>> StartSessionAsync(int resultId, string patientId)
         {
+            var user = await _userManager.FindByIdAsync(patientId);
             var result = await _resultRepository.GetByIdAsync(resultId);
             if (result is null)
                 return ServiceResult<AIChatSessionResponse>.Fail(404, "Result not found.", "...");
 
-            if (result.PatientProfileId != patientId)
+            if (result.PatientProfileId != user.IdentityNumber)
                 return ServiceResult<AIChatSessionResponse>.Fail(403, "This result does not belong to you.", "...");
 
             var contextSummary = BuildContextSummary(result);
 
             var session = new AIChat
             {
-                PatientProfileId = patientId,
+                PatientProfileId = user.IdentityNumber,
                 ResultId = resultId,
                 ContextSummary = contextSummary,
                 StartedAt = DateTime.UtcNow
@@ -65,7 +71,8 @@ namespace eLab.BLL.Services.Classes
 
         public async Task<ServiceResult<List<AIChatSessionResponse>>> GetMySessionsAsync(string patientId)
         {
-            var sessions = await _aiChatRepository.GetByPatientIdAsync(patientId);
+            var user = await _userManager.FindByIdAsync(patientId);
+            var sessions = await _aiChatRepository.GetByPatientIdAsync(user.IdentityNumber);
             return ServiceResult<List<AIChatSessionResponse>>.Ok(
                 sessions.Select(MapSession).ToList()
             );
@@ -73,11 +80,12 @@ namespace eLab.BLL.Services.Classes
 
         public async Task<ServiceResult<AIConversationResponse>> SendMessageAsync(int aiChatId, string patientId, string userMessage)
         {
+            var user = await _userManager.FindByIdAsync(patientId);
             var session = await _aiChatRepository.GetByIdAsync(aiChatId);
             if (session is null)
                 return ServiceResult<AIConversationResponse>.Fail(404, "AI chat session not found.", "...");
 
-            if (session.PatientProfileId != patientId)
+            if (session.PatientProfileId != user.IdentityNumber)
                 return ServiceResult<AIConversationResponse>.Fail(403, "Access denied.", "...");
 
             // 1. save user message

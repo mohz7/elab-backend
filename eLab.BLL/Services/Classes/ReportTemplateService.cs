@@ -68,7 +68,7 @@ namespace eLab.BLL.Services.Classes
             return ServiceResult<string>.Ok("Deleted successfully");
         }
 
-        public async Task<ServiceResult<string>> UpdateAsync(int id, ReportTemplateRequest request)
+        public async Task<ServiceResult<string>> UpdateAsync(int id, ReportTemplateUpdateRequest request)
         {
             var reportTemplate = await _reportTemplateRepository.GetByIdAsync(id);
             if (reportTemplate is null)

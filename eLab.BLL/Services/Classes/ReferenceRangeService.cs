@@ -40,7 +40,7 @@ namespace eLab.BLL.Services.Classes
             if (!referenceRanges.Any())
                 return ServiceResult<List<ReferenceRangeResponse>>.Fail(404, "There is no ReferenceRanges", "...");
             if (ReportTemplateId.HasValue)
-                referenceRanges.Where(re => re.ReportTemplateId == ReportTemplateId);
+                referenceRanges = referenceRanges.Where(re => re.ReportTemplateId == ReportTemplateId).ToList();
             var result = referenceRanges.Adapt<List<ReferenceRangeResponse>>();
             return ServiceResult<List<ReferenceRangeResponse>>.Ok(result);
         }
@@ -68,7 +68,7 @@ namespace eLab.BLL.Services.Classes
             return ServiceResult<string>.Ok("Deleted successfully");
         }
 
-        public async Task<ServiceResult<string>> UpdateAsync(int id, ReferenceRangeRequest request)
+        public async Task<ServiceResult<string>> UpdateAsync(int id, ReferenceRangeUpdateRequest request)
         {
             var referenceRange = await _referenceRangeRepository.GetByIdAsync(id);
             if (referenceRange is null) 

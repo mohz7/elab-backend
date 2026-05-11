@@ -17,6 +17,7 @@ namespace eLab.BLL.Services.Interface
         public Task<ServiceResult<BranchResponse>> GetByIdAsync(int id);
         public Task<ServiceResult<string>> CreateAsync(BranchRequest request, string userId);
         public Task<ServiceResult<string>> UpdateAsync(int id, BranchRequest request);
-        public Task<ServiceResult<string>> RemoveAsync(int id);
+        public Task<ServiceResult<string>> DeactivateAsync(int id);
+        public Task<ServiceResult<string>> ActivateAsync(int id);
     }
 }

@@ -360,7 +360,7 @@ namespace eLab.BLL.Services.Classes
                 return ServiceResult<CheckOutResponse>.Fail(400, "Staff can only create cash bookings", "...");
 
             // Check Cart
-            var cartItems = await _cartRepository.GetUserCartAsync(patientId);
+            var cartItems = await _cartRepository.GetUserCartAsync(patient.UserId);
             if (!cartItems.Any())
                 return ServiceResult<CheckOutResponse>.Fail(404, "Test basket is empty", "...");
 
@@ -403,7 +403,6 @@ namespace eLab.BLL.Services.Classes
                     o.EndDate >= today)
                 .ToList();
 
-            // ✅ حساب الـ TotalAmount مع الـ discount
             decimal totalAmount = 0;
             foreach (var price in validPrices)
             {
@@ -446,13 +445,16 @@ namespace eLab.BLL.Services.Classes
             {
                 PatientProfileId = patient.Id,
                 PaymentMethod = PaymentMethodEnum.Cash,
-                TotalAmount = totalAmount, // ✅ بيحسب مع الـ discount
+                TotalAmount = totalAmount,
                 BranchId = request.BranchId,
                 BookingDate = request.BookingDate,
                 BookingTime = request.BookingTime,
                 Notes = request.Notes,
                 CreatedById = userId,
-                StaffProfileId = staff.IdentityNumber
+                StaffProfileId = staff.IdentityNumber,
+                PaymentStatus = PaymentStatus.Paid,
+                Status = Status.Confirmed
+
             };
 
             await _bookingRepository.AddAsync(booking);
@@ -485,7 +487,7 @@ namespace eLab.BLL.Services.Classes
             }
 
             await _bookingItemRepository.AddRangeAsync(bookingItems);
-            await _cartRepository.ClearCartAsync(patientId);
+            await _cartRepository.ClearCartAsync(patient.UserId);
 
             // Send Email to Patient
             await _emailSender.SendEmailAsync(

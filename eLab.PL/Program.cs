@@ -19,6 +19,7 @@ using Stripe;
 using System;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.DataProtection;
+using Mapster;
 
 namespace eLab.PL
 {
@@ -121,6 +122,7 @@ namespace eLab.PL
             });
 
             var scope = app.Services.CreateScope();
+            TypeAdapterConfig.GlobalSettings.Default.IgnoreNullValues(true);
             var objectOfSeedData = scope.ServiceProvider.GetRequiredService<ISeedData>();
             await objectOfSeedData.IdentityDataSeedingAsync();
 

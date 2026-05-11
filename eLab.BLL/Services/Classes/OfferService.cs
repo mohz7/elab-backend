@@ -6,6 +6,8 @@ using eLab.DAL.Models;
 using eLab.DAL.Repository.Classes;
 using eLab.DAL.Repository.Interface;
 using Mapster;
+using Microsoft.AspNetCore.Identity;
+using Midicare_eLab.DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +19,16 @@ namespace eLab.BLL.Services.Classes
     public class OfferService : IOfferService
     {
         private readonly IOfferRepository _offerRepository;
+        private readonly UserManager<User> _userManager;
+        private readonly IStaffProfileRepository _staffProfileRepository;
 
-        public OfferService(IOfferRepository offerRepository)
+        public OfferService(IOfferRepository offerRepository,
+            UserManager<User> userManager,
+            IStaffProfileRepository staffProfileRepository)
         {
             _offerRepository = offerRepository;
+            _userManager = userManager;
+            _staffProfileRepository = staffProfileRepository;
         }
 
         public async Task<ServiceResult<string>> ActivateTestCatalogAsync(int id)
@@ -74,6 +82,21 @@ namespace eLab.BLL.Services.Classes
                 offers = offers.Where(o => o.IsActive == true).ToList();
             if (branchId.HasValue)
                 offers = offers.Where(o => o.BranchId == branchId).ToList();
+            if (!offers.Any())
+                return ServiceResult<List<OfferResponse>>.Fail(404, "The branch has no offers", "...");
+
+            var result = offers.Adapt<List<OfferResponse>>();
+            return ServiceResult<List<OfferResponse>>.Ok(result);
+        }
+
+        public async Task<ServiceResult<List<OfferResponse>>> GetAllAsync(string staffId)
+        {
+            var user = await _userManager.FindByIdAsync(staffId);
+            var staff = await _staffProfileRepository.GetByIdAsync(user.IdentityNumber);
+            if (user is null)
+                return ServiceResult<List<OfferResponse>>.Fail(404, "Staff not found", "...");
+            var offers = await _offerRepository.GetAllAsync();
+                offers = offers.Where(o => o.BranchId == staff.BranchId).ToList();
             if (!offers.Any())
                 return ServiceResult<List<OfferResponse>>.Fail(404, "The branch has no offers", "...");
 

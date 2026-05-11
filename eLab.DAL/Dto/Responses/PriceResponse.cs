@@ -13,5 +13,9 @@ namespace eLab.DAL.Dto.Responses
         public string Currency { get; set; }
         public DateTime EffectiveFrom { get; set; }
         public DateTime EffectiveTo { get; set; }
+        public int BranchId { get; set; }
+        public int TestCatalogId { get; set; }
+
+
     }
 }

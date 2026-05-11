@@ -2,12 +2,14 @@
 using eLab.BLL.Services.Interface;
 using eLab.DAL.Dto.Requests;
 using eLab.DAL.Dto.Responses;
+using eLab.DAL.Migrations;
 using eLab.DAL.Models;
 using eLab.DAL.Repository.Interface;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Midicare_eLab.DAL.Models;
 using System;
 using System.Collections.Generic;
@@ -21,17 +23,31 @@ namespace eLab.BLL.Services.Classes
     {
         private readonly INotificationRepository _notificationRepository;
         private readonly UserManager<User> _userManager;
+        private readonly IPatientProfileRepository _patientProfileRepository;
 
         public NotificationService(INotificationRepository notificationRepository,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            IPatientProfileRepository patientProfileRepository)
         {
             _notificationRepository = notificationRepository;
             _userManager = userManager;
+            _patientProfileRepository = patientProfileRepository;
         }
 
         public async Task<ServiceResult<List<NotificationResponse>>> GetAllByUserAsync(string userId)
         {
-            var notifications = await _notificationRepository.GetAllByUserAsync(userId);
+            User user = null;
+            if (userId.Length == 9)
+            {
+                user = await _userManager.Users.FirstOrDefaultAsync(us => us.IdentityNumber == userId);
+            }
+            else
+            {
+                user = await _userManager.FindByIdAsync(userId);
+            }
+                if (user == null)
+                    return ServiceResult<List<NotificationResponse>>.Fail(404, "User not found", "...");
+            var notifications = await _notificationRepository.GetAllByUserAsync(user.Id);
             if (!notifications.Any())
                 return ServiceResult<List<NotificationResponse>>.Fail(404, "Not any Notifications", "...");
 
@@ -51,7 +67,18 @@ namespace eLab.BLL.Services.Classes
 
         public async Task<ServiceResult<NotificationResponse>> GetByIdAsync(int id, string userId)
         {
-            var notification = await _notificationRepository.GetByIdAsync(id, userId);
+            User user = null;
+            if (userId.Length == 9)
+            {
+                user = await _userManager.Users.FirstOrDefaultAsync(us => us.IdentityNumber == userId);
+            }
+            else
+            {
+                user = await _userManager.FindByIdAsync(userId);
+            }
+            if (user is null)
+                return ServiceResult<NotificationResponse>.Fail(404, "user not found", "...");
+            var notification = await _notificationRepository.GetByIdAsync(id, user.Id);
             if (notification is null)
                 return ServiceResult<NotificationResponse>.Fail(404, "Notification not found", "...");
 
@@ -71,10 +98,10 @@ namespace eLab.BLL.Services.Classes
         public async Task<ServiceResult<string>> CreateAsync(NotificationRequest request)
         {
             var notification = request.Adapt<Notification>();
-            var user = await _userManager.FindByIdAsync(notification.UserId);
+            var user = await _userManager.Users.FirstOrDefaultAsync(us => us.IdentityNumber == notification.UserId);
             if (user is null)
                 return ServiceResult<string>.Fail(404, "User not found", "...");
-
+            notification.UserId = user.Id;
             var result = await _notificationRepository.CreateAsync(notification);
             if (result < 1)
                 return ServiceResult<string>.Fail(403, "Failed to create notification", "...");
@@ -107,7 +134,18 @@ namespace eLab.BLL.Services.Classes
 
         public async Task<ServiceResult<string>> RemoveAsync(int id, string userId)
         {
-            var notification = await _notificationRepository.GetByIdAsync(id, userId);
+            User user = null;
+            if (userId.Length == 9)
+            {
+                user = await _userManager.Users.FirstOrDefaultAsync(us => us.IdentityNumber == userId);
+            }
+            else
+            {
+                user = await _userManager.FindByIdAsync(userId);
+            }
+            if (user is null)
+                return ServiceResult<string>.Fail(404, "user not found", "...");
+            var notification = await _notificationRepository.GetByIdAsync(id, user.Id);
             if (notification is null)
                 return ServiceResult<string>.Fail(404, "Notification not found", "...");
 

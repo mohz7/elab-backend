@@ -47,7 +47,7 @@ namespace eLab.PL.Areas.Admin.Controllers
             return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("Update/{id}")]
-        public async Task<IActionResult> Update([FromHeader] int id, [FromBody] ReferenceRangeRequest request)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] ReferenceRangeUpdateRequest request)
         {
             var result = await _referenceRangeService.UpdateAsync(id, request);
             return StatusCode(result.StatusCode, result);

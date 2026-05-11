@@ -12,5 +12,7 @@ namespace eLab.DAL.Repository.Interface
         Task<int> AddAsync(Cart cart);
         Task<List<Cart>> GetUserCartAsync(string UserId);
         Task<bool> ClearCartAsync(string userId);
+        Task<Cart> GetById(int itemId);
+        Task<int> RemoveOneItemAsync(Cart cart);
     }
 }

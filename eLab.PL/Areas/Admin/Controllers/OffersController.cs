@@ -22,7 +22,7 @@ namespace eLab.PL.Areas.Admin.Controllers
             _offerService = offerService;
         }
 
-        [HttpGet("getALl")]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll([FromQuery] int? branchId)
         {
             var result = await _offerService.GetAllAsync(branchId, false);
@@ -47,7 +47,7 @@ namespace eLab.PL.Areas.Admin.Controllers
             var result = await _offerService.UpdateAsync(id, request);
             return StatusCode(result.StatusCode, result);
         }
-        [HttpDelete("Deactivate/{id}")]
+        [HttpPatch("Deactivate/{id}")]
         public async Task<IActionResult> DeactivateTestCatalog([FromRoute] int id)
         {
             var result = await _offerService.DeactivateTestCatalogAsync(id);

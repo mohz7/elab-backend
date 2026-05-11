@@ -16,6 +16,6 @@ namespace eLab.BLL.Services.Interface
         public Task<ServiceResult<ReferenceRangeResponse>> GetByIdAsync(int id);
         public Task<ServiceResult<string>> CreateAsync(ReferenceRangeRequest request, string adminId);
         public Task<ServiceResult<string>> RemoveAsync(int id);
-        public Task<ServiceResult<string>> UpdateAsync(int id, ReferenceRangeRequest request);
+        public Task<ServiceResult<string>> UpdateAsync(int id, ReferenceRangeUpdateRequest request);
     }
 }

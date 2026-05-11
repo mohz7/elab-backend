@@ -22,7 +22,7 @@ namespace eLab.PL.Areas.Patient.Controllers
             _offerService = offerService;
         }
 
-        [HttpGet("GetALl")]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll([FromQuery] int? branchId)
         {
             var result = await _offerService.GetAllAsync(branchId, false);

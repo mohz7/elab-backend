@@ -2,6 +2,7 @@
 using eLab.BLL.Services.Interface;
 using eLab.DAL.Dto.Requests;
 using eLab.DAL.Dto.Responses;
+using eLab.DAL.Migrations;
 using eLab.DAL.Models;
 using eLab.DAL.Repository.Interface;
 using Microsoft.AspNetCore.Identity;
@@ -18,24 +19,36 @@ namespace eLab.BLL.Services.Classes
     {
         private readonly ICartRepository _cartRepository;
         private readonly UserManager<User> _userManager;
+        private readonly IPatientProfileRepository _patientProfileRepository;
 
         public CartService(ICartRepository cartRepository,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            IPatientProfileRepository patientProfileRepository)
         {
             _cartRepository = cartRepository;
             _userManager = userManager;
+            _patientProfileRepository = patientProfileRepository;
         }
 
         public async Task<ServiceResult<string>> AddToCartAsync(CartRequest request, string UserId)
         {
-            var user = await _userManager.FindByIdAsync(UserId);
+            User user = null;
+            if (UserId.Length == 9)
+            {
+                var patient = await _patientProfileRepository.GetByIdAsync(UserId);
+                user = await _userManager.FindByIdAsync(patient.UserId);
+            }
+            else
+            {
+                user = await _userManager.FindByIdAsync(UserId);
+            }
             if (user is null)
                 return ServiceResult<string>.Fail(404, "User not found", "...");
 
             var newItem = new Cart
             {
                 TestCatalogId = request.TestCatalogId,
-                UserId = UserId,
+                UserId = user.Id,
                 CountItems = 1
             };
             var result = await _cartRepository.AddAsync(newItem);
@@ -47,11 +60,22 @@ namespace eLab.BLL.Services.Classes
 
         public async Task<ServiceResult<CartSummaryRespones>> CartSummaryResponesAsync(string UserId)
         {
-            var user = await _userManager.FindByIdAsync(UserId);
+            User user = null;
+            if (UserId.Length == 9)
+            {
+                var patient = await _patientProfileRepository.GetByIdAsync(UserId);
+                user = await _userManager.FindByIdAsync(patient.UserId);
+            }
+            else
+            {
+                user = await _userManager.FindByIdAsync(UserId);
+            }
             if (user is null)
                 return ServiceResult<CartSummaryRespones>.Fail(404, "User not found", "...");
 
-            var cartItems = await _cartRepository.GetUserCartAsync(UserId);
+            var cartItems = await _cartRepository.GetUserCartAsync(user.Id);
+            if (!cartItems.Any())
+                return ServiceResult<CartSummaryRespones>.Fail(404, "Cart is empty", "...");
 
             var now = DateTime.UtcNow;
 
@@ -59,6 +83,7 @@ namespace eLab.BLL.Services.Classes
             {
                 Items = cartItems.Select(ic => new CartResponse
                 {
+                    Id = ic.Id,
                     TestCatalogId = ic.TestCatalogId,
                     TestCatalogName = ic.TestCatalog?.Name,
 
@@ -75,11 +100,49 @@ namespace eLab.BLL.Services.Classes
 
         public async Task<ServiceResult<string>> ClearCartAsync(string userId)
         {
-            var result = await _cartRepository.ClearCartAsync(userId);
+            User user = null;
+            if (userId.Length == 9)
+            {
+                var patient = await _patientProfileRepository.GetByIdAsync(userId);
+                user = await _userManager.FindByIdAsync(patient.UserId);
+            }
+            else
+            {
+                user = await _userManager.FindByIdAsync(userId);
+            }
+            var result = await _cartRepository.ClearCartAsync(user.Id);
             if (!result)
                 return ServiceResult<string>.Fail(500, "Failed to Clear test basket", "...");
 
             return ServiceResult<string>.Ok("Clear successfully");
+        }
+
+        public async Task<ServiceResult<string>> RemoveOneItemAsync(string userId, int itemId)
+        {
+            User user = null;
+            if (userId.Length == 9)
+            {
+                var patient = await _patientProfileRepository.GetByIdAsync(userId);
+                user = await _userManager.FindByIdAsync(patient.UserId);
+            }
+            else
+            {
+                user = await _userManager.FindByIdAsync(userId);
+            }
+            if (user is null)
+                return ServiceResult<string>.Fail(404, "User not found", "...");
+
+            var cartItems = await _cartRepository.GetUserCartAsync(user.Id);
+            if (!cartItems.Any())
+                return ServiceResult<string>.Fail(404, "Cart is empty", "...");
+            var item = await _cartRepository.GetById(itemId);
+            if(item is null)
+                return ServiceResult<string>.Fail(404, "This item not found", "...");
+            var result = await _cartRepository.RemoveOneItemAsync(item);
+            if (result < 1)
+                return ServiceResult<string>.Fail(403, "Remove item is failed", "...");
+            return ServiceResult<string>.Ok("Remove item is successfully");
+
         }
     }
 }

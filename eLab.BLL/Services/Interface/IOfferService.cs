@@ -12,6 +12,7 @@ namespace eLab.BLL.Services.Interface
     public interface IOfferService
     {
         public Task<ServiceResult<List<OfferResponse>>> GetAllAsync(int? branchId, bool onlyActive = false);
+        public Task<ServiceResult<List<OfferResponse>>> GetAllAsync(string staffId);
         public Task<ServiceResult<OfferResponse>> GetByIdAsync(int id);
         public Task<ServiceResult<string>> CreateAsync(OfferRequest request, string adminId);
         public Task<ServiceResult<string>> UpdateAsync(int id, OfferRequest request);

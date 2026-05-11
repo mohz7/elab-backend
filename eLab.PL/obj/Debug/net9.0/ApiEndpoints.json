@@ -102,6 +102,22 @@
   },
   {
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.BranchsController",
+    "Method": "Activate",
+    "RelativePath": "api/admin/Branchs/Activate/{id}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Admin.Controllers.BranchsController",
     "Method": "Create",
     "RelativePath": "api/admin/Branchs/Create",
     "HttpMethod": "POST",
@@ -111,6 +127,22 @@
       {
         "Name": "request",
         "Type": "eLab.DAL.Dto.Requests.BranchRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Admin.Controllers.BranchsController",
+    "Method": "Deactivate",
+    "RelativePath": "api/admin/Branchs/Deactivate/{id}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],
@@ -137,27 +169,6 @@
       {
         "Name": "id",
         "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "eLab.PL.Areas.Admin.Controllers.BranchsController",
-    "Method": "Remove",
-    "RelativePath": "api/admin/Branchs/Remove/{id}",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": false
-      },
-      {
-        "Name": "id",
-        "Type": "",
         "IsRequired": true
       }
     ],
@@ -320,7 +331,7 @@
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.OffersController",
     "Method": "DeactivateTestCatalog",
     "RelativePath": "api/admin/Offers/Deactivate/{id}",
-    "HttpMethod": "DELETE",
+    "HttpMethod": "PATCH",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -335,7 +346,7 @@
   {
     "ContainingType": "eLab.PL.Areas.Admin.Controllers.OffersController",
     "Method": "GetAll",
-    "RelativePath": "api/admin/Offers/getALl",
+    "RelativePath": "api/admin/Offers/GetAll",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -649,7 +660,7 @@
       },
       {
         "Name": "request",
-        "Type": "eLab.DAL.Dto.Requests.PriceRequest",
+        "Type": "eLab.DAL.Dto.Requests.PriceUpdateRequest",
         "IsRequired": true
       }
     ],
@@ -730,16 +741,11 @@
       {
         "Name": "id",
         "Type": "System.Int32",
-        "IsRequired": false
-      },
-      {
-        "Name": "request",
-        "Type": "eLab.DAL.Dto.Requests.ReferenceRangeRequest",
         "IsRequired": true
       },
       {
-        "Name": "id",
-        "Type": "",
+        "Name": "request",
+        "Type": "eLab.DAL.Dto.Requests.ReferenceRangeUpdateRequest",
         "IsRequired": true
       }
     ],
@@ -820,16 +826,11 @@
       {
         "Name": "id",
         "Type": "System.Int32",
-        "IsRequired": false
-      },
-      {
-        "Name": "request",
-        "Type": "eLab.DAL.Dto.Requests.ReportTemplateRequest",
         "IsRequired": true
       },
       {
-        "Name": "id",
-        "Type": "",
+        "Name": "request",
+        "Type": "eLab.DAL.Dto.Requests.ReportTemplateUpdateRequest",
         "IsRequired": true
       }
     ],
@@ -1335,6 +1336,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.BookingsController",
+    "Method": "GetByBookingId",
+    "RelativePath": "api/patient/Bookings/GetByBookingId/{bookingId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookingId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "eLab.PL.Areas.Patient.Controllers.BranchsController",
     "Method": "GetAllPatient",
     "RelativePath": "api/patient/Branchs/GetALl",
@@ -1394,6 +1411,22 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Patient.Controllers.CartsController",
+    "Method": "RemoveOneItem",
+    "RelativePath": "api/patient/Carts/{itemId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "itemId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -1588,7 +1621,7 @@
   {
     "ContainingType": "eLab.PL.Areas.Patient.Controllers.OffersController",
     "Method": "GetAll",
-    "RelativePath": "api/patient/Offers/GetALl",
+    "RelativePath": "api/patient/Offers/GetAll",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -1897,6 +1930,27 @@
   },
   {
     "ContainingType": "eLab.PL.Areas.Staff.Controllers.CartsController",
+    "Method": "RemoveOneItem",
+    "RelativePath": "api/staff/Carts/{itemId}/{userId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "itemId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.CartsController",
     "Method": "AddToCart",
     "RelativePath": "api/staff/Carts/{userId}",
     "HttpMethod": "POST",
@@ -1921,6 +1975,22 @@
     "Method": "GetUserCart",
     "RelativePath": "api/staff/Carts/{userId}",
     "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "eLab.PL.Areas.Staff.Controllers.CartsController",
+    "Method": "ClearCart",
+    "RelativePath": "api/staff/Carts/{userId}",
+    "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -2129,17 +2199,11 @@
   {
     "ContainingType": "eLab.PL.Areas.Staff.Controllers.OffersController",
     "Method": "GetAll",
-    "RelativePath": "api/staff/Offers/GetALl",
+    "RelativePath": "api/staff/Offers/GetAll",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [
-      {
-        "Name": "branchId",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
-      }
-    ],
+    "Parameters": [],
     "ReturnTypes": []
   },
   {

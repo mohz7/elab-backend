@@ -14,7 +14,7 @@ namespace eLab.BLL.Services.Interface
         public Task<ServiceResult<List<PriceResponse>>> GetAllAsync(int? branchId);
         public Task<ServiceResult<PriceResponse>> GetByIdAsync(int id);
         public Task<ServiceResult<string>> CreateAsync(PriceRequest request, string adminId);
-        public Task<ServiceResult<string>> UpdateAsync(int id, PriceRequest request);
+        public Task<ServiceResult<string>> UpdateAsync(int id, PriceUpdateRequest request);
         public Task<ServiceResult<string>> RemoveAsync(int id);
     }
 }

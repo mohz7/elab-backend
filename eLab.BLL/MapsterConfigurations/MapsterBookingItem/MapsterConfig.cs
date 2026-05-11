@@ -12,7 +12,6 @@ namespace eLab.BLL.MapsterConfigurations.MapsterBookingItem
     {
         public static void MapsterConfigRegister(this IServiceCollection services)
         {
-            // ✅ سجل على GlobalSettings مباشرة
             TypeAdapterConfig.GlobalSettings.NewConfig<BookingItem, BookingItemResponse>()
                 .Map(d => d.TestName, s => s.TestCatalog != null ? s.TestCatalog.Name : null)
                 .Map(d => d.Offer, s => s.Offer != null ? s.Offer.Title : null);
@@ -23,7 +22,10 @@ namespace eLab.BLL.MapsterConfigurations.MapsterBookingItem
                 .Map(d => d.Branch, s => s.Branch != null ? s.Branch.Name : null)
                 .Map(d => d.StaffProfile, s => s.StaffProfile != null && s.StaffProfile.User != null
                     ? s.StaffProfile.User.FullName
-                    : null);
+                    : null)
+                .Map(d => d.BookingItems, s => s.BookingItems != null
+                    ? s.BookingItems.Adapt<List<BookingItemResponse>>()
+                    : new List<BookingItemResponse>());
 
             TypeAdapterConfig.GlobalSettings.NewConfig<ReportTemplate, ReportTemplateRequest>()
                 .Map(d => d.Fields,

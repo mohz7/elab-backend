@@ -41,11 +41,11 @@ namespace eLab.DAL.Repository.Classes
             return await _context.Branches.ToListAsync();
         }
 
-        public async Task<int> RemoveAsync(Branch branch)
-        {
-            _context.Branches.Remove(branch);
-            return await _context.SaveChangesAsync();
-        }
+        //public async Task<int> RemoveAsync(Branch branch)
+        //{
+        //    _context.Branches.Remove(branch);
+        //    return await _context.SaveChangesAsync();
+        //}
 
         public async Task<int> UpdateAsync(Branch branch)
         {

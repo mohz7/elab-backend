@@ -34,6 +34,11 @@ namespace eLab.DAL.Repository.Classes
             return true;
         }
 
+        public async Task<Cart> GetById(int itemId)
+        {
+            return await _context.Carts.FindAsync(itemId);
+        }
+
         public async Task<List<Cart>> GetUserCartAsync(string UserId)
         {
             return await _context.Carts
@@ -41,6 +46,12 @@ namespace eLab.DAL.Repository.Classes
                     .ThenInclude(t => t.Prices)
                 .Where(c => c.UserId == UserId)
                 .ToListAsync();
+        }
+
+        public async Task<int> RemoveOneItemAsync(Cart cart)
+        {
+            _context.Carts.Remove(cart);
+            return await _context.SaveChangesAsync();
         }
     }
 }

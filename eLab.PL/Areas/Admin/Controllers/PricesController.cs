@@ -41,7 +41,7 @@ namespace eLab.PL.Areas.Admin.Controllers
             return StatusCode(result.StatusCode, result);
         }
         [HttpPatch("Update/{id}")]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] PriceRequest request)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] PriceUpdateRequest request)
         {
             var result = await _priceService.UpdateAsync(id, request);
             return StatusCode(result.StatusCode, result);

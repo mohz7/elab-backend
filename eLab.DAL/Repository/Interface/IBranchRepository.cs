@@ -16,6 +16,6 @@ namespace eLab.DAL.Repository.Interface
         public Task<Branch> GetByIdAsync(int id);
         public Task<int> CreateAsync(Branch branch);
         public Task<int> UpdateAsync(Branch branch);
-        public Task<int> RemoveAsync(Branch branch);
+        //public Task<int> RemoveAsync(Branch branch);
     }
 }

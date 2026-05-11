@@ -31,6 +31,7 @@ namespace eLab.DAL.Repository.Classes
         {
             var booking = await _context.Bookings
                 .Include(o => o.PatientProfile)
+                    .ThenInclude(pa => pa.User)
                 .FirstOrDefaultAsync(o => o.Id == bookingId);
 
             return booking?.PatientProfile;

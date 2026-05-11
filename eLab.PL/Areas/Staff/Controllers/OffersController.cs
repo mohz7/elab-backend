@@ -22,10 +22,11 @@ namespace eLab.PL.Areas.Staff.Controllers
             _offerService = offerService;
         }
 
-        [HttpGet("GetALl")]
-        public async Task<IActionResult> GetAll([FromQuery] int? branchId)
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _offerService.GetAllAsync(branchId, false);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _offerService.GetAllAsync(userId);
             return StatusCode(result.StatusCode, result);
         }
         [HttpGet("GetById/{id}")]

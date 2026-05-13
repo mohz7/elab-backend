@@ -39,12 +39,17 @@ namespace eLab.DAL.Repository.Classes
         public async Task<List<ReferenceRange>> GetByTemplateIdAsync(int reportTemplateId, int age, Gender gender)
         {
             return await _context.ReferenceRanges
-            .Where(re =>
-                re.ReportTemplateId == reportTemplateId && 
-                re.Gender == gender &&
-                re.AgeMin <= age &&
-                re.AgeMax >= age)
-            .ToListAsync();
+                .Where(re =>
+                    re.ReportTemplateId == reportTemplateId &&
+                    re.Gender == gender &&
+                    re.AgeMin <= age &&
+                    re.AgeMax >= age)
+                .OrderByDescending(re => re.Id)  
+                .ToListAsync()
+                .ContinueWith(t => t.Result
+                    .GroupBy(re => re.FieldName, StringComparer.OrdinalIgnoreCase)
+                    .Select(g => g.First()) 
+                    .ToList());
         }
 
         public async Task<int> RemoveAsync(ReferenceRange referenceRange)

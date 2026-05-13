@@ -47,38 +47,40 @@ namespace eLab.BLL.Services.Classes
             _patientProfileRepository = patientProfileRepository;
         }
 
-        public async Task<UserResponse> LoginAsync(LoginRequest loginRequest)
+        public async Task<ServiceResult<UserResponse>> LoginAsync(LoginRequest loginRequest)
         {
             User? user = null;
 
             if (!string.IsNullOrEmpty(loginRequest.Email))
-            {
                 user = await _userManager.FindByEmailAsync(loginRequest.Email);
-            }
             else if (!string.IsNullOrEmpty(loginRequest.IdentityNumber))
-            {
                 user = await _userManager.Users
                     .FirstOrDefaultAsync(u => u.IdentityNumber == loginRequest.IdentityNumber);
-            }
 
             if (user is null)
-                throw new Exception("Invalid email or IdentityNumber");
+                return ServiceResult<UserResponse>.Fail(404, "Invalid email or IdentityNumber", "...");
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginRequest.Password, true);
 
             if (result.IsLockedOut)
-                throw new Exception("Your account is locked");
+            {
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                var remaining = lockoutEnd - DateTimeOffset.UtcNow;
+                return ServiceResult<UserResponse>.Fail(403,
+                    $"Your account is locked. Try again in {remaining?.Minutes} minutes.", "...");
+            }
 
             if (result.IsNotAllowed)
-                throw new Exception("Please confirm your email");
+                return ServiceResult<UserResponse>.Fail(403, "Please confirm your email", "...");
 
             if (!result.Succeeded)
-                throw new Exception("Invalid password");
+                return ServiceResult<UserResponse>.Fail(401, "Invalid password", "...");
 
-            return new UserResponse()
+
+            return ServiceResult<UserResponse>.Ok(new UserResponse
             {
                 Token = await CreateTokenAsync(user)
-            };
+            });
         }
 
         public async Task<string> ConfirmEmail(string token, string userId)
@@ -101,6 +103,19 @@ namespace eLab.BLL.Services.Classes
 
         public async Task<ServiceResult<string>> RegisterAsync(RegisterRequest registerRequest, HttpRequest Request)
         {
+            var existingEmail = await _userManager.FindByEmailAsync(registerRequest.Email);
+            if (existingEmail != null)
+                return ServiceResult<string>.Fail(400, "DUPLICATE_EMAIL", "Email is already in use");
+
+            var existingUsername = await _userManager.FindByNameAsync(registerRequest.UserName);
+            if (existingUsername != null)
+                return ServiceResult<string>.Fail(400, "DUPLICATE_USERNAME", "Username is already in use");
+
+            var existingIdentity = await _userManager.Users
+                .AnyAsync(u => u.IdentityNumber == registerRequest.IdentityNumber);
+            if (existingIdentity)
+                return ServiceResult<string>.Fail(400, "DUPLICATE_IDENTITY", "Identity number is already in use");
+
             var user = new User()
             {
                 FullName = registerRequest.FullName,
@@ -113,11 +128,24 @@ namespace eLab.BLL.Services.Classes
             };
 
             var result = await _userManager.CreateAsync(user, registerRequest.Password);
-
             if (!result.Succeeded)
-                throw new Exception(string.Join(",", result.Errors.Select(e => e.Description)));
+            {
+                var errors = result.Errors.Select(e => e.Code switch
+                {
+                    "PasswordTooShort" => "Password is too short",
+                    "PasswordRequiresNonAlphanumeric" => "Password must contain a special character",
+                    "PasswordRequiresDigit" => "Password must contain a digit",
+                    "PasswordRequiresLower" => "Password must contain a lowercase letter",
+                    "PasswordRequiresUpper" => "Password must contain an uppercase letter",
+                    "DuplicateUserName" => "Username is already taken",
+                    "DuplicateEmail" => "Email is already taken",
+                    "InvalidUserName" => "Username is invalid",
+                    "InvalidEmail" => "Email is invalid",
+                    _ => e.Description
+                });
+                return ServiceResult<string>.Fail(400, "REGISTRATION_FAILED", string.Join(" | ", errors));
+            }
 
-            // إنشاء الـ PatientProfile
             var patient = new PatientProfile()
             {
                 Id = user.IdentityNumber,
@@ -134,7 +162,7 @@ namespace eLab.BLL.Services.Classes
 
             var resultPatient = await _patientProfileRepository.CreateAsync(patient);
             if (resultPatient != 1)
-                throw new Exception("Failed patient create");
+                return ServiceResult<string>.Fail(500, "PATIENT_CREATE_FAILED", "Failed to create patient profile, please try again");
 
             await _userManager.AddToRoleAsync(user, "Patient");
 
@@ -156,7 +184,7 @@ namespace eLab.BLL.Services.Classes
                 "
             );
 
-            return ServiceResult<string>.Ok("Please confirm your email");
+            return ServiceResult<string>.Ok("Registration successful, please confirm your email");
         }
 
         private async Task<string> CreateTokenAsync(User user)

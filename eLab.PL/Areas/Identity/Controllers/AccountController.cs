@@ -22,13 +22,13 @@ namespace eLab.PL.Areas.Identity.Controllers
         public async Task<ActionResult> Register(RegisterRequest request)
         {
             var result = await _authenticationService.RegisterAsync(request, Request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpPost("Login")]
         public async Task<ActionResult<UserResponse>> Login(LoginRequest request)
         {
             var result = await _authenticationService.LoginAsync(request);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
         [HttpGet("ConfirmEmail")]
         public async Task<ActionResult<string>> ConfirmEmail([FromQuery] string token, [FromQuery] string userId)

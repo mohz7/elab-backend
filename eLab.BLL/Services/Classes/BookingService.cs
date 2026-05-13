@@ -22,16 +22,19 @@ namespace eLab.BLL.Services.Classes
         private readonly UserManager<User> _userManager;
         private readonly IPatientProfileRepository _patientProfileRepository;
         private readonly IStaffProfileRepository _staffProfileRepository;
+        private readonly INotificationRepository _notificationRepository;
 
         public BookingService(IBookingRepository bookingRepository,
             UserManager<User> userManager,
             IPatientProfileRepository patientProfileRepository,
-            IStaffProfileRepository staffProfileRepository)
+            IStaffProfileRepository staffProfileRepository,
+            INotificationRepository notificationRepository)
         {
             _bookingRepository = bookingRepository;
             _userManager = userManager;
             _patientProfileRepository = patientProfileRepository;
             _staffProfileRepository = staffProfileRepository;
+            _notificationRepository = notificationRepository;
         }
 
         public async Task<ServiceResult<Booking>> AddAsync(Booking booking)
@@ -47,6 +50,27 @@ namespace eLab.BLL.Services.Classes
                 return ServiceResult<bool>.Fail(404, "booking not found", "...");
 
             var result = await _bookingRepository.ChangeStatusAsync(bookingId, newStatus);
+
+            // إرسال إشعار للمريض عند تغيير حالة الحجز
+            var notificationMessage = newStatus.Status switch
+            {
+                Status.Confirmed => $"Your booking #{bookingId} has been confirmed.",
+                Status.Cancelled => $"Your booking #{bookingId} has been cancelled.",
+                Status.Completed => $"Your booking #{bookingId} has been completed. Thank you for visiting us!",
+                _ => $"Your booking #{bookingId} status has been updated to {newStatus.Status}."
+            };
+
+            var notification = new Notification
+            {
+                UserId = booking.PatientProfile.UserId,
+                Type = NotificationType.AppointmentReminder,
+                Message = notificationMessage,
+                IsRead = false,
+                ResultId = null
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+
             return ServiceResult<bool>.Ok(result);
         }
 

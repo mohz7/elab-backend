@@ -36,6 +36,7 @@ namespace eLab.BLL.Services.Classes
         private readonly IBookingItemRepository _bookingItemRepository;
         private readonly IStaffProfileRepository _staffProfileRepository;
         private readonly IConfiguration _configuration;
+        private readonly INotificationRepository _notificationRepository;
 
         public CheckOutService(ICartRepository cartRepository,
             UserManager<User> userManager,
@@ -48,7 +49,8 @@ namespace eLab.BLL.Services.Classes
             IEmailSender emailSender,
             IBookingItemRepository bookingItemRepository,
             IStaffProfileRepository staffProfileRepository,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            INotificationRepository notificationRepository)
         {
             _cartRepository = cartRepository;
             _userManager = userManager;
@@ -62,16 +64,31 @@ namespace eLab.BLL.Services.Classes
             _bookingItemRepository = bookingItemRepository;
             _staffProfileRepository = staffProfileRepository;
             _configuration = configuration;
+            _notificationRepository = notificationRepository;
+        }
+
+        // Helper method لإرسال الإشعار
+        private async Task SendBookingNotificationAsync(string userId, int bookingId, NotificationType type, string message)
+        {
+            var notification = new Notification
+            {
+                UserId = userId,
+                Type = type,
+                Message = message,
+                IsRead = false,
+                ResultId = null, // الإشعار مرتبط بالحجز مش بنتيجة تحليل
+            };
+            await _notificationRepository.CreateAsync(notification);
         }
 
         public async Task<ServiceResult<bool>> HandlePaymentSuccessAsync(int bookingId)
         {
-
             var booking = await _bookingRepository.GetByIdAsync(bookingId);
             if (booking.Status == Status.Confirmed)
             {
                 return ServiceResult<bool>.Ok(true);
             }
+
             var userId = booking.PatientProfile.User.Id;
             var today = DateTime.Today;
             var prices = await _priceRepository.GetAllAsync();
@@ -116,17 +133,23 @@ namespace eLab.BLL.Services.Classes
             await _bookingItemRepository.AddRangeAsync(bookingItems);
             await _cartRepository.ClearCartAsync(userId);
 
-            string subject, body;
+            string subject, body, notificationMessage;
+            NotificationType notificationType;
 
             if (booking.PaymentMethod == PaymentMethodEnum.Visa)
             {
                 booking.Status = Status.Confirmed;
                 booking.PaymentStatus = PaymentStatus.Paid;
                 await _bookingRepository.UpdateAsync(booking);
+
                 subject = "Payment successful - eLab";
                 body = $"<h1>Thank you for your payment</h1>" +
                        $"<p>Booking ID: {bookingId}</p>" +
                        $"<p>Total Amount: {booking.TotalAmount}</p>";
+
+                // الدفع بالفيزا تم بنجاح → AppointmentReminder لتذكير المريض بالحجز المؤكد
+                notificationMessage = $"Your payment has been confirmed. Booking #{bookingId} is now confirmed. Total: {booking.TotalAmount:C}.";
+                notificationType = NotificationType.AppointmentReminder;
             }
             else
             {
@@ -134,9 +157,15 @@ namespace eLab.BLL.Services.Classes
                 body = $"<h1>Thank you for your booking</h1>" +
                        $"<p>Booking ID: {bookingId}</p>" +
                        $"<p>Total Amount: {booking.TotalAmount}</p>";
+
+                // الدفع كاش → AppointmentReminder لتذكير المريض بموعده
+                notificationMessage = $"Your booking #{bookingId} has been placed successfully. Total: {booking.TotalAmount:C}. Please pay at the branch.";
+                notificationType = NotificationType.AppointmentReminder;
             }
 
+            await SendBookingNotificationAsync(userId, bookingId, notificationType, notificationMessage);
             await _emailSender.SendEmailAsync(booking.PatientProfile.User.Email, subject, body);
+
             return ServiceResult<bool>.Ok(true);
         }
 
@@ -255,6 +284,7 @@ namespace eLab.BLL.Services.Classes
 
             if (request.PaymentMethod == PaymentMethodEnum.Cash)
             {
+                // الإشعار بيتبعت جوا HandlePaymentSuccessAsync
                 await HandlePaymentSuccessAsync(booking.Id);
 
                 return ServiceResult<CheckOutResponse>.Ok(new CheckOutResponse
@@ -273,7 +303,7 @@ namespace eLab.BLL.Services.Classes
                     PaymentMethodTypes = new List<string> { "card" },
                     LineItems = new List<SessionLineItemOptions>(),
                     Mode = "payment",
-                    SuccessUrl = $"{baseUrl}/api/patient/CheckOuts/success/{booking.Id}", 
+                    SuccessUrl = $"{baseUrl}/api/patient/CheckOuts/success/{booking.Id}",
                     CancelUrl = $"{baseUrl}/checkout/cancel",
                 };
 
@@ -291,9 +321,9 @@ namespace eLab.BLL.Services.Classes
                         ? itemPrice.BasePrice * (itemOffer.DiscountPercent / 100m)
                         : 0;
 
-                    long finalUnitAmount = (long)(Math.Max(0, itemPrice.BasePrice - itemDiscount) * 100); 
+                    long finalUnitAmount = (long)(Math.Max(0, itemPrice.BasePrice - itemDiscount) * 100);
 
-                    options.LineItems.Add(new SessionLineItemOptions 
+                    options.LineItems.Add(new SessionLineItemOptions
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
@@ -314,6 +344,14 @@ namespace eLab.BLL.Services.Classes
 
                 booking.PaymentId = session.Id;
 
+                // إشعار: في انتظار إتمام الدفع → SystemAlert
+                await SendBookingNotificationAsync(
+                    userId,
+                    booking.Id,
+                    NotificationType.SystemAlert,
+                    $"Your booking #{booking.Id} is pending payment. Please complete your payment to confirm the booking. Total: {totalAmount:C}."
+                );
+
                 result = new CheckOutResponse
                 {
                     Success = true,
@@ -331,6 +369,7 @@ namespace eLab.BLL.Services.Classes
             };
             return ServiceResult<CheckOutResponse>.Ok(result);
         }
+
         public async Task<ServiceResult<CheckOutResponse>> ProcessPaymentByStaffAsync(string patientId, CheckOutRequest request, string userId, HttpRequest Request)
         {
             var result = new CheckOutResponse();
@@ -454,7 +493,6 @@ namespace eLab.BLL.Services.Classes
                 StaffProfileId = staff.IdentityNumber,
                 PaymentStatus = PaymentStatus.Paid,
                 Status = Status.Confirmed
-
             };
 
             await _bookingRepository.AddAsync(booking);
@@ -488,6 +526,14 @@ namespace eLab.BLL.Services.Classes
 
             await _bookingItemRepository.AddRangeAsync(bookingItems);
             await _cartRepository.ClearCartAsync(patient.UserId);
+
+            // إشعار للمريض: الحجز تم من قبل الموظف → AppointmentReminder
+            await SendBookingNotificationAsync(
+                patientUser.Id,
+                booking.Id,
+                NotificationType.AppointmentReminder,
+                $"Your booking #{booking.Id} has been created by our staff. Total: {booking.TotalAmount:C}. Payment method: Cash."
+            );
 
             // Send Email to Patient
             await _emailSender.SendEmailAsync(

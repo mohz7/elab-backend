@@ -12,11 +12,11 @@ namespace eLab.PL.Helper
             {
                 EnableSsl = true,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential("abood7tt@gmail.com", "dnby zqkb ydon jpjv")
+                Credentials = new NetworkCredential("elabsystem1@gmail.com", "hiws lqeb rkni kzwi")
             };
 
             return client.SendMailAsync(
-                new MailMessage(from: "abood7tt@gmail.com",
+                new MailMessage(from: "elabsystem1@gmail.com",
                                 to: email,
                                 subject,
                                 htmlMessage

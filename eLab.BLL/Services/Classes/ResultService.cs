@@ -65,6 +65,9 @@ namespace eLab.BLL.Services.Classes
             if (patient == null)
                 return ServiceResult<ResultResponse>.Fail(404, "Patient profile not found.", "...");
 
+            if (bookingItem.Booking.Status != Status.Confirmed)
+                return ServiceResult<ResultResponse>.Fail(400, "Cannot upload result for a booking that is not confirmed.", "...");
+
             var ranges = await _referenceRangeRepository
                 .GetByTemplateIdAsync(dto.ReportTemplateId, patient.User.Age, patient.User.Gender);
 
@@ -254,7 +257,7 @@ namespace eLab.BLL.Services.Classes
         {
             if (branchId.HasValue)
             {
-                var branch = await _branchRepository.GetByIdAsync(branchId.Value); // ✅
+                var branch = await _branchRepository.GetByIdAsync(branchId.Value); 
                 if (branch == null)
                     return ServiceResult<List<ResultSummaryResponse>>.Fail(404, "Branch not found.", "...");
             }
@@ -267,8 +270,8 @@ namespace eLab.BLL.Services.Classes
                 TestName = r.BookingItem?.TestCatalog?.Name ?? "",
                 ResultDate = r.ResultDate,
                 Status = r.Status,
-                AbnormalCount = r.ResultFlags == ResultFlags.Normal ? 0 : 1, // ✅
-                HasAbnormalValues = r.ResultFlags != ResultFlags.Normal,       // ✅
+                AbnormalCount = r.ResultFlags == ResultFlags.Normal ? 0 : 1, 
+                HasAbnormalValues = r.ResultFlags != ResultFlags.Normal,       
                 UploadedAt = r.UploadedAt
             }).ToList();
 
@@ -282,7 +285,6 @@ namespace eLab.BLL.Services.Classes
             if (!results.Any())
                 return ServiceResult<List<ResultResponse>>.Fail(404, "Result not found", "...");
 
-            // ✅ فلتر بالـ userId
             if (!string.IsNullOrWhiteSpace(userId))
             {
                 var user = await _userManager.Users
@@ -292,7 +294,6 @@ namespace eLab.BLL.Services.Classes
                 results = results.Where(re => re.UploadedById == user.Id).ToList();
             }
 
-            // ✅ فلتر بالـ branchId
             if (branchId.HasValue)
             {
                 var branch = await _branchRepository.GetByIdAsync(branchId.Value);
@@ -388,7 +389,6 @@ namespace eLab.BLL.Services.Classes
                 var range = ranges.FirstOrDefault(r =>
                     r.FieldName.Equals(kvp.Key, StringComparison.OrdinalIgnoreCase));
 
-                // ✅ احسب flag لكل parameter لحاله
                 ResultFlags paramFlag = ResultFlags.Normal;
                 if (range != null)
                 {
@@ -402,7 +402,7 @@ namespace eLab.BLL.Services.Classes
                 {
                     ParameterName = kvp.Key,
                     Value = kvp.Value,
-                    Flag = paramFlag, // ✅ بدل result.ResultFlags
+                    Flag = paramFlag, 
                     RangeMin = range?.ValueMin,
                     RangeMax = range?.ValueMax,
                     Unit = range?.Units

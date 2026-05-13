@@ -13,9 +13,9 @@ namespace eLab.BLL.Services.Interface
 {
     public interface IAuthenticationService
     {
-       Task<UserResponse> LoginAsync(LoginRequest loginRequest);
-       Task<ServiceResult<string>> RegisterAsync(RegisterRequest registerRequest, HttpRequest Request);
-       Task<string> ConfirmEmail(string token , string userId );
+        Task<ServiceResult<UserResponse>> LoginAsync(LoginRequest loginRequest);
+        Task<ServiceResult<string>> RegisterAsync(RegisterRequest registerRequest, HttpRequest Request);
+        Task<string> ConfirmEmail(string token , string userId );
         Task<bool> ForgotPasswordAsync(ForgotPassword request);
         Task<bool> ResetPasswordAsync(ResetPasswordRequest request);
 

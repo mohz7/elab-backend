@@ -20,6 +20,7 @@ namespace eLab.DAL.DTO.Requests
         public string PhoneNumber { get; set; }
 
         [Required]
+        [RegularExpression(@"^\d{9}$", ErrorMessage = "Identity number must be exactly 9 digits.")]
         public string IdentityNumber { get; set; }
 
         [Required]
@@ -31,6 +32,8 @@ namespace eLab.DAL.DTO.Requests
         public DateOnly DateOfBirth { get; set; }
 
         [Required]
+        [EmailAddress]        
+        [MaxLength(254)]
         public string Email { get; set; }
 
         [Required]

@@ -12,7 +12,7 @@ namespace eLab.DAL.Dto.Requests
         public string? Description { get; set; }
         public int? Version { get; set; }
         public int? TestCatalogId { get; set; }
-        public List<FieldDefinition> Fields { get; set; }
+        public List<FieldDefinition>? Fields { get; set; }
 
         public class FieldDefinition
         {

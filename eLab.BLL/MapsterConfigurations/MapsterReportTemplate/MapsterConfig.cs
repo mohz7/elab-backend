@@ -3,12 +3,8 @@ using eLab.DAL.Dto.Responses;
 using eLab.DAL.Models;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace eLab.BLL.MapsterConfigurations.MapsterReportTemplate
 {
@@ -30,6 +26,13 @@ namespace eLab.BLL.MapsterConfigurations.MapsterReportTemplate
                 .Map(d => d.FieldsSchema,
                      s => SerializeFieldsSchema(s.Fields));
 
+            // ReportTemplateUpdateRequest → ReportTemplate
+            TypeAdapterConfig<ReportTemplateUpdateRequest, ReportTemplate>
+                .NewConfig()
+                .Map(d => d.FieldsSchema, s => SerializeUpdateFieldsSchema(s.Fields))
+                .IgnoreNullValues(true);
+
+            // ReportTemplate → ReportTemplateResponse
             TypeAdapterConfig<ReportTemplate, ReportTemplateResponse>
                 .NewConfig()
                 .Map(d => d.FieldsSchema,
@@ -48,5 +51,10 @@ namespace eLab.BLL.MapsterConfigurations.MapsterReportTemplate
 
         private static string SerializeFieldsSchema(List<ReportTemplateRequest.FieldDefinition> fields)
             => JsonSerializer.Serialize(fields);
+
+        private static string? SerializeUpdateFieldsSchema(List<ReportTemplateUpdateRequest.FieldDefinition>? fields)
+            => fields != null && fields.Count > 0
+                ? JsonSerializer.Serialize(fields)
+                : null;
     }
 }

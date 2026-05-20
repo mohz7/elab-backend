@@ -75,11 +75,12 @@ namespace eLab.BLL.Services.Classes
                 return ServiceResult<string>.Fail(404, "ReportTemplate not found", "...");
 
             request.Adapt(reportTemplate);
+
             var result = await _reportTemplateRepository.UpdateAsync(reportTemplate);
             if (result != 1)
                 return ServiceResult<string>.Fail(401, "Update failed", "...");
 
-            return ServiceResult<string>.Ok("Update is successfully");
+            return ServiceResult<string>.Ok("Updated successfully");
         }
     }
 }

@@ -12,6 +12,8 @@ namespace eLab.DAL.Dto.Responses
         public string Name { get; set; }
         public string Description { get; set; }
         public List<FieldDefinition> FieldsSchema { get; set; }
+        public int TestCatalogId { get; set; }
+
         public int Version { get; set; }
         public DateTime CreatedAt { get; set; }
 

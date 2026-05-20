@@ -6,23 +6,36 @@ namespace eLab.PL.Helper
 {
     public class EmailSetting : IEmailSender
     {
-        public Task SendEmailAsync(string email, string subject, string htmlMessage)
+        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            var client = new SmtpClient("smtp.gmail.com", 587)
+            try
             {
-                EnableSsl = true,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential("elabsystem1@gmail.com", "hiws lqeb rkni kzwi")
-            };
+                var client = new SmtpClient("smtp.gmail.com", 587)
+                {
+                    EnableSsl = true,
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential("elabsystem1@gmail.com", "ivjt wqux ycqu ojss")
+                };
 
-            return client.SendMailAsync(
-                new MailMessage(from: "elabsystem1@gmail.com",
-                                to: email,
-                                subject,
-                                htmlMessage
-                                )
-                { IsBodyHtml = true});
+                await client.SendMailAsync(
+                    new MailMessage(
+                        from: "elabsystem1@gmail.com",
+                        to: email,
+                        subject,
+                        htmlMessage
+                    )
+                    { IsBodyHtml = true }
+                );
+
+                Console.WriteLine("✅ Email sent successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error: {ex.Message}");
+                Console.WriteLine($"Details: {ex.InnerException?.Message}");
+            }
         }
     }
     
 }
+

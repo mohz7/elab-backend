@@ -15,6 +15,7 @@ namespace eLab.DAL.Dto.Responses
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int BranchId { get; set; }
+        public int TestCatalogId { get; set; }
         public bool IsActive { get; set; }
 
 

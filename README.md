@@ -1,83 +1,93 @@
-eLab Backend-Graduation project
+# eLab Backend-Graduation project
 
+> ASP.NET Core REST API powering the eLab medical laboratory management platform — handling authentication, lab test bookings, results, payments, AI analysis, and multi-branch management.
 
-ASP.NET Core REST API powering the eLab medical laboratory management platform — handling authentication, lab test bookings, results, payments, AI analysis, and multi-branch management.
+---
 
+## ✨ Features
 
+- **JWT Authentication** — Secure login for patients, staff, and admins with role-based access control
+- **Patient Management** — Full patient profiles with medical history, emergency contacts, and insurance info
+- **Test Catalog** — Manage laboratory tests by category, sample type, and turnaround time
+- **Appointment Booking** — Multi-branch booking system with time slot management
+- **Results Management** — Upload, approve, and deliver lab results to patients
+- **Stripe Payments** — Online payment integration with multi-currency support (USD / ILS)
+- **AI Analysis** — AI-powered result interpretation chat sessions per patient
+- **Offers & Pricing** — Discount management across branches and test categories
+- **Report Templates** — Customizable result report templates
+- **Reference Ranges** — Define normal value ranges per test for automated flagging
+- **Multi-Branch Support** — Manage multiple lab branches with independent staff and scheduling
+- **Real-time Notifications** — Alert patients on booking and result updates
+- **Staff & Admin Portals** — Dedicated role-specific endpoints
 
+---
 
-✨ Features
+## 🧰 Tech Stack
 
+| Technology | Purpose |
+|---|---|
+| ASP.NET Core 9 | Web API framework |
+| C# | Language |
+| Entity Framework Core | ORM / Database access |
+| SQL Server | Database |
+| JWT Bearer | Authentication |
+| Stripe.NET | Payment processing |
+| Clean Architecture | Project structure pattern |
 
-JWT Authentication — Secure login for patients, staff, and admins with role-based access control
-Patient Management — Full patient profiles with medical history, emergency contacts, and insurance info
-Test Catalog — Manage laboratory tests by category, sample type, and turnaround time
-Appointment Booking — Multi-branch booking system with time slot management
-Results Management — Upload, approve, and deliver lab results to patients
-Stripe Payments — Online payment integration with multi-currency support (USD / ILS)
-AI Analysis — AI-powered result interpretation chat sessions per patient
-Offers & Pricing — Discount management across branches and test categories
-Report Templates — Customizable result report templates
-Reference Ranges — Define normal value ranges per test for automated flagging
-Multi-Branch Support — Manage multiple lab branches with independent staff and scheduling
-Real-time Notifications — Alert patients on booking and result updates
-Staff & Admin Portals — Dedicated role-specific endpoints
+---
 
+## 🗂️ Project Structure
 
-
-🧰 Tech Stack
-
-TechnologyPurposeASP.NET Core 9Web API frameworkC#LanguageEntity Framework CoreORM / Database accessSQL ServerDatabaseJWT BearerAuthenticationStripe.NETPayment processingClean ArchitectureProject structure pattern
-
-
-🗂️ Project Structure
-
+```
 eLab/
 ├── eLab.PL/          # Presentation Layer — Controllers, API endpoints
 ├── eLab.BLL/         # Business Logic Layer — Services, DTOs
 ├── eLab.DAL/         # Data Access Layer — Entities, Repositories, DbContext
 └── eLab.sln          # Solution file
+```
 
+---
 
-🚀 Getting Started
+## 🚀 Getting Started
 
-Prerequisites
+### Prerequisites
+- .NET 9 SDK
+- SQL Server (local or remote)
+- Visual Studio 2022+ or VS Code
 
+### Installation
 
-.NET 9 SDK
-SQL Server (local or remote)
-Visual Studio 2022+ or VS Code
-
-
-Installation
-
-bash# Clone the repo
+```bash
+# Clone the repo
 git clone https://github.com/mohz7/elab-backend.git
 cd elab-backend
+```
 
-Open eLab.sln in Visual Studio, then:
+Open `eLab.sln` in Visual Studio, then:
 
+1. Update `appsettings.json` with your database connection string and API keys
+2. Run migrations to set up the database:
 
-Update appsettings.json with your database connection string and API keys
-Run migrations to set up the database:
-
-
-bashcd eLab.DAL
+```bash
+cd eLab.DAL
 dotnet ef database update
+```
 
+3. Run the project:
 
-Run the project:
-
-
-bashcd eLab.PL
+```bash
+cd eLab.PL
 dotnet run
+```
 
-The API will be available at https://localhost:7000 (or as configured).
+The API will be available at `https://localhost:7000` (or as configured).
 
+---
 
-🔑 Configuration (appsettings.json)
+## 🔑 Configuration (`appsettings.json`)
 
-json{
+```json
+{
   "ConnectionStrings": {
     "DefaultConnection": "Server=.;Database=eLabDB;Trusted_Connection=True;"
   },
@@ -90,24 +100,38 @@ json{
     "SecretKey": "your_stripe_secret_key"
   }
 }
+```
 
+> ⚠️ Never commit real API keys to GitHub. Use environment variables or user secrets in production.
 
-⚠️ Never commit real API keys to GitHub. Use environment variables or user secrets in production.
+---
 
+## 📡 API Overview
 
+| Group | Endpoints |
+|---|---|
+| Auth | Register, Login, Forgot Password |
+| Patients | Profile, Medical History, Bookings, Results |
+| Tests | Catalog, Categories, Prices, Offers |
+| Bookings | Create, View, Update Status |
+| Results | Upload, Approve, View by Patient |
+| Payments | Stripe Checkout, Payment Status |
+| AI | Create Session, Send Message, Get History |
+| Admin | Users, Staff, Branches, Templates, Ranges |
+| Notifications | Send, Mark as Read |
 
+---
 
-📡 API Overview
+## 👤 User Roles
 
-GroupEndpointsAuthRegister, Login, Forgot PasswordPatientsProfile, Medical History, Bookings, ResultsTestsCatalog, Categories, Prices, OffersBookingsCreate, View, Update StatusResultsUpload, Approve, View by PatientPaymentsStripe Checkout, Payment StatusAICreate Session, Send Message, Get HistoryAdminUsers, Staff, Branches, Templates, RangesNotificationsSend, Mark as Read
+| Role | Description |
+|---|---|
+| Patient | Book tests, view results, use AI analysis, pay online |
+| Staff | Manage bookings, upload results, access patient profiles |
+| Admin | Full system control — all of the above plus catalog, pricing, staff, and branch management |
 
+---
 
-👤 User Roles
+## 🔗 Related
 
-RoleDescriptionPatientBook tests, view results, use AI analysis, pay onlineStaffManage bookings, upload results, access patient profilesAdminFull system control — all of the above plus catalog, pricing, staff, and branch management
-
-
-🔗 Related
-
-
-eLab Frontend — React web application
+- [eLab Frontend](https://github.com/mohz7/elab-fixed) — React web application
